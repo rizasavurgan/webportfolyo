@@ -71,7 +71,7 @@ export default function ContactPage() {
     loadData()
 
     // Listen for storage changes
-    const handleStorageChange = (e: any) => {
+    const handleStorageChange = (e: StorageEvent) => {
       console.log('Contact page - Storage changed:', e.key)
       if (e.key === 'refreshSite' || e.key?.includes('portfolio_')) {
         console.log('Contact page - Refreshing data...')
@@ -125,12 +125,12 @@ export default function ContactPage() {
             className="mb-16"
           >
             <h1 className="text-4xl lg:text-6xl xl:text-7xl text-brutal text-black leading-none mb-6">
-              Let's Work Together
+              Let&apos;s Work Together
             </h1>
-            <p className="text-lg lg:text-xl text-gray-600 max-w-2xl">
-              Have a project in mind? I'd love to hear about it. 
-              Send me a message and let's discuss how we can bring your ideas to life.
-            </p>
+                    <p className="text-lg lg:text-xl text-gray-600 max-w-2xl">
+                      Have a project in mind? I&apos;d love to hear about it. 
+                      Send me a message and let&apos;s discuss how we can bring your ideas to life.
+                    </p>
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -151,12 +151,12 @@ export default function ContactPage() {
                   className="p-8 bg-green-50 border border-green-200 rounded-lg text-center"
                 >
                   <div className="text-green-600 text-4xl mb-4 font-bold">SUCCESS</div>
-                  <h3 className="text-xl font-semibold text-green-800 mb-2">
-                    Message Sent!
-                  </h3>
-                  <p className="text-green-600">
-                    Thank you for your message. I'll get back to you soon.
-                  </p>
+                          <h3 className="text-xl font-semibold text-green-800 mb-2">
+                            Message Sent!
+                          </h3>
+                          <p className="text-green-600">
+                            Thank you for your message. I&apos;ll get back to you soon.
+                          </p>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -279,11 +279,11 @@ export default function ContactPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
                   Response Time
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  I typically respond to messages within 24 hours. 
-                  For urgent projects, please mention it in your message 
-                  and I'll prioritize your request.
-                </p>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                          I typically respond to messages within 24 hours. 
+                          For urgent projects, please mention it in your message 
+                          and I&apos;ll prioritize your request.
+                        </p>
               </div>
             </motion.div>
           </div>

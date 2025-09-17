@@ -16,12 +16,12 @@ import {
   LogOut,
   Eye
 } from 'lucide-react'
-import { getProjects, initializeData } from '@/lib/data'
+import { getProjects, initializeData, Project } from '@/lib/data'
 import StorageInfo from '@/components/StorageInfo'
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [projects, setProjects] = useState<any[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
   const [stats, setStats] = useState({
     totalProjects: 0,
     totalMessages: 12,

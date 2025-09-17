@@ -7,11 +7,11 @@ import SocialLinks from '@/components/SocialLinks'
 import ProjectCard from '@/components/ProjectCard'
 import OverlayText from '@/components/OverlayText'
 import Footer from '@/components/Footer'
-import { getPublishedProjects, getSiteSettings, initializeData } from '@/lib/data'
+import { getPublishedProjects, getSiteSettings, initializeData, Project } from '@/lib/data'
 
 export default function Home() {
-  const [projects, setProjects] = useState<any[]>([])
-  const [socialLinks, setSocialLinks] = useState<any[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [socialLinks, setSocialLinks] = useState<Array<{platform: string, url: string}>>([])
   const [siteTitle, setSiteTitle] = useState('Rıza Savurgan')
   const [siteDescription, setSiteDescription] = useState('Designer & Developer based in Istanbul')
   const [isLoading, setIsLoading] = useState(true)
@@ -40,7 +40,7 @@ export default function Home() {
     loadData()
 
     // Listen for storage changes (when admin panel updates data)
-    const handleStorageChange = (e: any) => {
+    const handleStorageChange = (e: StorageEvent) => {
       console.log('Storage changed:', e.key)
       if (e.key === 'refreshSite' || e.key?.includes('portfolio_')) {
         console.log('Refreshing data...')

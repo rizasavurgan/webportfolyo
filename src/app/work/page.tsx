@@ -6,11 +6,11 @@ import ProjectCard from '@/components/ProjectCard'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getPublishedProjects, initializeData, getSiteSettings } from '@/lib/data'
+import { getPublishedProjects, initializeData, getSiteSettings, Project, SiteSettings } from '@/lib/data'
 
 export default function WorkPage() {
-  const [projects, setProjects] = useState<any[]>([])
-  const [siteSettings, setSiteSettings] = useState<any>({})
+  const [projects, setProjects] = useState<Project[]>([])
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({})
   const [isLoading, setIsLoading] = useState(true)
 
   const loadData = () => {
@@ -34,7 +34,7 @@ export default function WorkPage() {
     loadData()
 
     // Listen for storage changes
-    const handleStorageChange = (e: any) => {
+    const handleStorageChange = (e: StorageEvent) => {
       console.log('Work page - Storage changed:', e.key)
       if (e.key === 'refreshSite' || e.key?.includes('portfolio_')) {
         console.log('Work page - Refreshing data...')

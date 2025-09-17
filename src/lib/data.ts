@@ -1,5 +1,5 @@
 // Data management utilities for admin panel and site
-import { safeSetItem, STORAGE_KEYS, cleanupOldData } from './storage-utils'
+import { safeSetItem, STORAGE_KEYS } from './storage-utils'
 
 export interface Project {
   _id: string
@@ -19,6 +19,7 @@ export interface Project {
   }
   gallery?: string[]
   externalLink?: string
+  views?: number
 }
 
 export interface SiteSettings {

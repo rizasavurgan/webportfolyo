@@ -6,7 +6,7 @@ import SocialLinks from '@/components/SocialLinks'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getSiteSettings, initializeData } from '@/lib/data'
+import { getSiteSettings, initializeData, SiteSettings } from '@/lib/data'
 
 // Mock data - will be replaced with Sanity CMS data
 const mockAbout = {
@@ -48,16 +48,9 @@ const mockAbout = {
   },
 }
 
-const mockSocialLinks = [
-  { platform: 'instagram', url: 'https://instagram.com/rizasavurgan' },
-  { platform: 'behance', url: 'https://behance.net/rizasavurgan' },
-  { platform: 'linkedin', url: 'https://linkedin.com/in/rizasavurgan' },
-  { platform: 'twitter', url: 'https://twitter.com/rizasavurgan' },
-]
 
 export default function MePage() {
-  const [siteSettings, setSiteSettings] = useState<any>({})
-  const [socialLinks, setSocialLinks] = useState<any[]>([])
+  const [socialLinks, setSocialLinks] = useState<Array<{platform: string, url: string}>>([])
 
   const loadData = () => {
     try {
@@ -66,7 +59,6 @@ export default function MePage() {
       
       // Load site settings
       const siteSettingsData = getSiteSettings()
-      setSiteSettings(siteSettingsData)
       setSocialLinks(siteSettingsData.socialLinks)
     } catch (error) {
       console.error('Error loading about data:', error)
@@ -77,7 +69,7 @@ export default function MePage() {
     loadData()
 
     // Listen for storage changes
-    const handleStorageChange = (e: any) => {
+    const handleStorageChange = (e: StorageEvent) => {
       console.log('About page - Storage changed:', e.key)
       if (e.key === 'refreshSite' || e.key?.includes('portfolio_')) {
         console.log('About page - Refreshing data...')

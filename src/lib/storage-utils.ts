@@ -14,7 +14,7 @@ export function checkStorageQuota(): { used: number, available: boolean } {
   if (typeof window === 'undefined') return { used: 0, available: true }
   
   let used = 0
-  for (let key in localStorage) {
+  for (const key in localStorage) {
     if (localStorage.hasOwnProperty(key)) {
       used += localStorage[key].length + key.length
     }
@@ -27,7 +27,7 @@ export function checkStorageQuota(): { used: number, available: boolean } {
 }
 
 // Compress and optimize data before storing
-export function optimizeDataForStorage(data: any): any {
+export function optimizeDataForStorage(data: unknown): unknown {
   if (!data) return data
   
   // If it's an array of projects, optimize each project
@@ -36,17 +36,17 @@ export function optimizeDataForStorage(data: any): any {
   }
   
   // If it's a single project, optimize it
-  if (data._id && data.title) {
+  if (typeof data === 'object' && data !== null && '_id' in data && 'title' in data) {
     return optimizeProject(data)
   }
   
   return data
 }
 
-function optimizeProject(project: any): any {
-  if (!project) return project
+function optimizeProject(project: unknown): unknown {
+  if (!project || typeof project !== 'object' || project === null) return project
   
-  const optimized = { ...project }
+  const optimized = { ...project as Record<string, unknown> }
   
   // Compress gallery images (reduce quality for storage)
   if (optimized.gallery && Array.isArray(optimized.gallery)) {
@@ -68,7 +68,7 @@ function optimizeProject(project: any): any {
 }
 
 // Safe storage with quota checking
-export function safeSetItem(key: string, value: any): boolean {
+export function safeSetItem(key: string, value: unknown): boolean {
   try {
     const optimizedValue = optimizeDataForStorage(value)
     const stringValue = JSON.stringify(optimizedValue)

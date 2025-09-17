@@ -19,7 +19,7 @@ export default function Footer() {
     loadData()
 
     // Listen for storage changes
-    const handleStorageChange = (e: any) => {
+    const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'refreshSite' || e.key?.includes('portfolio_')) {
         loadData()
       }

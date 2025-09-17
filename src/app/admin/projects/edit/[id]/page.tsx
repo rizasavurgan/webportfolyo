@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react'
-import { getProjects, saveProjects, Project } from '@/lib/data'
+import { getProjects, saveProjects, Project, initializeData } from '@/lib/data'
 
 export default function EditProjectPage() {
   const params = useParams()
@@ -14,7 +14,7 @@ export default function EditProjectPage() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [project, setProject] = useState<Project | null>(null)
+  const [project, setProject] = useState<Project & { coverImage: string; gallery: string[] } | null>(null)
 
   useEffect(() => {
     const auth = localStorage.getItem('adminAuth')
@@ -28,10 +28,7 @@ export default function EditProjectPage() {
     const loadData = async () => {
       try {
         // Initialize data if not exists
-        if (typeof window !== 'undefined') {
-          const { initializeData } = require('@/lib/data')
-          initializeData()
-        }
+        initializeData()
         
         const projects = getProjects()
         const foundProject = projects.find(p => p._id === projectId)
@@ -44,9 +41,11 @@ export default function EditProjectPage() {
 
         setProject({
           ...foundProject,
-          coverImage: foundProject.coverImage?.asset?._ref || '',
+          coverImage: typeof foundProject.coverImage === 'string' 
+            ? foundProject.coverImage 
+            : foundProject.coverImage?.asset?._ref || '',
           gallery: foundProject.gallery || []
-        })
+        } as Project & { coverImage: string; gallery: string[] })
       } catch (error) {
         console.error('Error loading project:', error)
         alert('Proje yüklenirken bir hata oluştu!')

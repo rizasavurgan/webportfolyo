@@ -1,24 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getProjectBySlug, initializeData } from '@/lib/data'
+import { getProjectBySlug, initializeData, Project } from '@/lib/data'
 
-export default function ProjectDetailPage({ params }: { params: { slug: string } }) {
-  const [project, setProject] = useState<any>(null)
+export default function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const loadData = () => {
+  const loadData = useCallback(async () => {
     try {
       // Initialize data if not exists
       initializeData()
       
+      // Await params
+      const resolvedParams = await params
+      
       // Load project by slug
-      const foundProject = getProjectBySlug(params.slug)
+      const foundProject = getProjectBySlug(resolvedParams.slug)
       
       if (!foundProject) {
         // Project not found
@@ -32,7 +35,7 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
       console.error('Error loading project:', error)
       setLoading(false)
     }
-  }
+  }, [params])
 
   useEffect(() => {
     loadData()
@@ -49,7 +52,7 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('dataUpdated', handleStorageChange)
     }
-  }, [params.slug])
+  }, [params.slug, loadData])
 
   if (loading) {
     return (

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowLeft, Save, Upload, User, Mail, FileText } from 'lucide-react'
-import { getAboutContent, saveAboutContent, getContactContent, saveContactContent, AboutContent, ContactContent } from '@/lib/data'
+import { getAboutContent, saveAboutContent, getContactContent, saveContactContent, AboutContent, ContactContent, initializeData } from '@/lib/data'
 
 export default function ContentPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -58,10 +58,7 @@ export default function ContentPage() {
     const loadData = async () => {
       try {
         // Initialize data if not exists
-        if (typeof window !== 'undefined') {
-          const { initializeData } = require('@/lib/data')
-          initializeData()
-        }
+        initializeData()
         
         const aboutData = getAboutContent()
         const contactData = getContactContent()
@@ -75,7 +72,7 @@ export default function ContentPage() {
     loadData()
   }, [])
 
-  const handleAboutChange = (field: string, value: any) => {
+  const handleAboutChange = (field: string, value: string) => {
     setAboutContent(prev => ({
       ...prev,
       [field]: value
@@ -105,7 +102,7 @@ export default function ContentPage() {
     }))
   }
 
-  const handleSkillChange = (index: number, field: string, value: any) => {
+  const handleSkillChange = (index: number, field: string, value: string | number) => {
     setAboutContent(prev => ({
       ...prev,
       skills: prev.skills.map((skill, i) => 
@@ -128,7 +125,7 @@ export default function ContentPage() {
     }))
   }
 
-  const handleContactChange = (field: string, value: any) => {
+  const handleContactChange = (field: string, value: string | object) => {
     setContactContent(prev => ({
       ...prev,
       [field]: value
