@@ -1,67 +1,91 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import SocialLinks from '@/components/SocialLinks'
 import ProjectCard from '@/components/ProjectCard'
 import OverlayText from '@/components/OverlayText'
-
-// Mock data - will be replaced with Sanity CMS data
-const mockProjects = [
-  {
-    _id: '1',
-    title: 'Brutalist Brand Identity',
-    slug: { current: 'brutalist-brand-identity' },
-    shortDescription: 'A bold and uncompromising brand identity system for a contemporary art gallery.',
-    role: 'Art Direction / Brand Design',
-    coverImage: {
-      asset: {
-        _ref: 'image-1',
-        _type: 'reference'
-      }
-    },
-    backgroundColor: '#FFD700',
-    date: '2024-01-15',
-  },
-  {
-    _id: '2',
-    title: 'Typography Experiment',
-    slug: { current: 'typography-experiment' },
-    shortDescription: 'Exploring the boundaries of digital typography through experimental layouts.',
-    role: 'Web Design / Typography',
-    coverImage: {
-      asset: {
-        _ref: 'image-2',
-        _type: 'reference'
-      }
-    },
-    backgroundColor: '#00FF00',
-    date: '2024-02-20',
-  },
-  {
-    _id: '3',
-    title: 'Minimalist Web Design',
-    slug: { current: 'minimalist-web-design' },
-    shortDescription: 'Clean and functional web design focusing on user experience and content hierarchy.',
-    role: 'UI/UX Design',
-    coverImage: {
-      asset: {
-        _ref: 'image-3',
-        _type: 'reference'
-      }
-    },
-    backgroundColor: '#FF6B35',
-    date: '2024-03-10',
-  },
-]
-
-const mockSocialLinks = [
-  { platform: 'instagram', url: 'https://instagram.com/rizasavurgan' },
-  { platform: 'behance', url: 'https://behance.net/rizasavurgan' },
-  { platform: 'linkedin', url: 'https://linkedin.com/in/rizasavurgan' },
-]
+import Footer from '@/components/Footer'
+import { getPublishedProjects, getSiteSettings, initializeData } from '@/lib/data'
 
 export default function Home() {
+  const [projects, setProjects] = useState<any[]>([])
+  const [socialLinks, setSocialLinks] = useState<any[]>([])
+  const [siteTitle, setSiteTitle] = useState('Rıza Savurgan')
+  const [siteDescription, setSiteDescription] = useState('Designer & Developer based in Istanbul')
+  const [isLoading, setIsLoading] = useState(true)
+
+  const loadData = () => {
+    try {
+      // Initialize data if not exists
+      initializeData()
+      
+      // Load projects and settings
+      const publishedProjects = getPublishedProjects()
+      const siteSettings = getSiteSettings()
+      
+      setProjects(publishedProjects)
+      setSocialLinks(siteSettings.socialLinks)
+      setSiteTitle(siteSettings.siteTitle)
+      setSiteDescription(siteSettings.siteDescription)
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error loading data:', error)
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+
+    // Listen for storage changes (when admin panel updates data)
+    const handleStorageChange = (e: any) => {
+      console.log('Storage changed:', e.key)
+      if (e.key === 'refreshSite' || e.key?.includes('portfolio_')) {
+        console.log('Refreshing data...')
+        loadData()
+      }
+    }
+
+    const handleCustomEvent = () => {
+      console.log('Custom event received')
+      loadData()
+    }
+
+    // Listen for localStorage changes
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Listen for custom events from admin panel
+    window.addEventListener('dataUpdated', handleCustomEvent)
+
+    // Check for refresh token every second
+    const refreshInterval = setInterval(() => {
+      const refreshToken = localStorage.getItem('refreshSite')
+      if (refreshToken) {
+        localStorage.removeItem('refreshSite')
+        console.log('Refresh token found, reloading data...')
+        loadData()
+      }
+    }, 1000)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('dataUpdated', handleCustomEvent)
+      clearInterval(refreshInterval)
+    }
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen bg-white">
       {/* Overlay Text */}
@@ -79,11 +103,11 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="space-y-4"
             >
-              <h1 className="text-4xl lg:text-6xl xl:text-7xl text-brutal text-black leading-none">
-                Rıza is a designer based in Istanbul.
-              </h1>
+                      <h1 className="text-4xl lg:text-6xl xl:text-7xl text-brutal text-black leading-none">
+                        {siteTitle}
+                      </h1>
               <p className="text-lg lg:text-xl text-gray-600 font-medium">
-                Currently freelancing for a bit ;)
+                {siteDescription}
               </p>
             </motion.div>
 
@@ -103,7 +127,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <SocialLinks links={mockSocialLinks} />
+            <SocialLinks links={socialLinks} />
           </motion.div>
         </div>
 
@@ -121,7 +145,7 @@ export default function Home() {
               </h2>
               
               <div className="grid gap-8">
-                {mockProjects.map((project, index) => (
+                {projects.map((project, index) => (
                   <ProjectCard
                     key={project._id}
                     project={project}
@@ -147,7 +171,7 @@ export default function Home() {
           </h2>
           
           <div className="grid gap-6">
-            {mockProjects.map((project, index) => (
+            {projects.map((project, index) => (
               <ProjectCard
                 key={project._id}
                 project={project}
@@ -157,6 +181,9 @@ export default function Home() {
           </div>
         </motion.div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

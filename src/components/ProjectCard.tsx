@@ -10,9 +10,10 @@ interface ProjectCardProps {
     slug: { current: string }
     shortDescription: string
     role?: string
-    coverImage: any
+    coverImage?: any
     backgroundColor?: string
     date: string
+    gallery?: string[]
   }
   index: number
 }
@@ -41,12 +42,35 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
         >
           <div className="p-6">
             <div className="relative mb-4 overflow-hidden rounded-lg">
-              <div 
-                className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 font-medium"
-                style={{ backgroundColor: project.backgroundColor || '#f3f4f6' }}
-              >
-                {project.title}
-              </div>
+              {project.gallery && project.gallery.length > 0 ? (
+                <div className="w-full h-48 relative overflow-hidden rounded-lg">
+                  <img 
+                    src={project.gallery[0]} 
+                    alt={project.title}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      console.error('Proje görseli yüklenemedi:', project.title)
+                      e.currentTarget.style.display = 'none'
+                      // Fallback görsel göster
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                    }}
+                    onLoad={() => {
+                      console.log('Proje görseli yüklendi:', project.title)
+                    }}
+                  />
+                  <div className="hidden absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 font-medium">
+                    {project.title}
+                  </div>
+                  <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300" />
+                </div>
+              ) : (
+                <div 
+                  className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 font-medium"
+                  style={{ backgroundColor: project.backgroundColor || '#f3f4f6' }}
+                >
+                  {project.title}
+                </div>
+              )}
             </div>
             
             <div className="space-y-2">

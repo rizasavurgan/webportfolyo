@@ -1,23 +1,13 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Mail, Phone, MapPin } from 'lucide-react'
 import SocialLinks from '@/components/SocialLinks'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
-
-// Mock data - will be replaced with Sanity CMS data
-const mockContact = {
-  email: 'hello@rizasavurgan.com',
-  phone: '+90 555 123 45 67',
-  socialLinks: [
-    { platform: 'instagram', url: 'https://instagram.com/rizasavurgan' },
-    { platform: 'behance', url: 'https://behance.net/rizasavurgan' },
-    { platform: 'linkedin', url: 'https://linkedin.com/in/rizasavurgan' },
-    { platform: 'twitter', url: 'https://twitter.com/rizasavurgan' },
-  ],
-}
+import Footer from '@/components/Footer'
+import { getSiteSettings, initializeData } from '@/lib/data'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -27,6 +17,17 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [contactInfo, setContactInfo] = useState({
+    email: 'hello@rizasavurgan.com',
+    phone: '+90 555 123 45 67',
+    location: 'Istanbul, Turkey'
+  })
+  const [socialLinks, setSocialLinks] = useState([
+    { platform: 'instagram', url: 'https://instagram.com/rizasavurgan' },
+    { platform: 'behance', url: 'https://behance.net/rizasavurgan' },
+    { platform: 'linkedin', url: 'https://linkedin.com/in/rizasavurgan' },
+    { platform: 'twitter', url: 'https://twitter.com/rizasavurgan' },
+  ])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +52,57 @@ export default function ContactPage() {
       [e.target.name]: e.target.value,
     })
   }
+
+  const loadData = () => {
+    try {
+      // Initialize data if not exists
+      initializeData()
+      
+      // Load site settings
+      const siteSettings = getSiteSettings()
+      setContactInfo(siteSettings.contactInfo)
+      setSocialLinks(siteSettings.socialLinks)
+    } catch (error) {
+      console.error('Error loading contact data:', error)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+
+    // Listen for storage changes
+    const handleStorageChange = (e: any) => {
+      console.log('Contact page - Storage changed:', e.key)
+      if (e.key === 'refreshSite' || e.key?.includes('portfolio_')) {
+        console.log('Contact page - Refreshing data...')
+        loadData()
+      }
+    }
+
+    const handleCustomEvent = () => {
+      console.log('Contact page - Custom event received')
+      loadData()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('dataUpdated', handleCustomEvent)
+
+    // Check for refresh token every second
+    const refreshInterval = setInterval(() => {
+      const refreshToken = localStorage.getItem('refreshSite')
+      if (refreshToken) {
+        localStorage.removeItem('refreshSite')
+        console.log('Contact page - Refresh token found, reloading data...')
+        loadData()
+      }
+    }, 1000)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('dataUpdated', handleCustomEvent)
+      clearInterval(refreshInterval)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-white">
@@ -185,10 +237,10 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold text-gray-900">Email</h3>
                       <a
-                        href={`mailto:${mockContact.email}`}
+                        href={`mailto:${contactInfo.email}`}
                         className="text-gray-600 hover:text-black transition-colors"
                       >
-                        {mockContact.email}
+                        {contactInfo.email}
                       </a>
                     </div>
                   </div>
@@ -198,10 +250,10 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold text-gray-900">Phone</h3>
                       <a
-                        href={`tel:${mockContact.phone}`}
+                        href={`tel:${contactInfo.phone}`}
                         className="text-gray-600 hover:text-black transition-colors"
                       >
-                        {mockContact.phone}
+                        {contactInfo.phone}
                       </a>
                     </div>
                   </div>
@@ -210,7 +262,7 @@ export default function ContactPage() {
                     <MapPin className="w-5 h-5 text-gray-600 mt-1" />
                     <div>
                       <h3 className="font-semibold text-gray-900">Location</h3>
-                      <p className="text-gray-600">Istanbul, Turkey</p>
+                      <p className="text-gray-600">{contactInfo.location}</p>
                     </div>
                   </div>
                 </div>
@@ -220,7 +272,7 @@ export default function ContactPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Follow Me
                 </h3>
-                <SocialLinks links={mockContact.socialLinks} />
+                <SocialLinks links={socialLinks} />
               </div>
 
               <div className="bg-gray-50 p-6 rounded-lg">
@@ -249,6 +301,9 @@ export default function ContactPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

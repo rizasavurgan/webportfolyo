@@ -1,80 +1,89 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Navigation from '@/components/Navigation'
+import Footer from '@/components/Footer'
+import { getProjectBySlug, initializeData } from '@/lib/data'
 
-// Mock data - will be replaced with Sanity CMS data
-const mockProject = {
-  _id: '1',
-  title: 'Brutalist Brand Identity',
-  slug: { current: 'brutalist-brand-identity' },
-  shortDescription: 'A bold and uncompromising brand identity system for a contemporary art gallery.',
-  fullDescription: [
-    {
-      _type: 'block',
-      children: [
-        {
-          _type: 'span',
-          text: 'This project explores the intersection of brutalist design principles and contemporary brand identity. The challenge was to create a visual system that would stand out in the competitive art world while maintaining accessibility and functionality.',
-        },
-      ],
-    },
-    {
-      _type: 'block',
-      children: [
-        {
-          _type: 'span',
-          text: 'The solution involved developing a modular typography system, a bold color palette, and a flexible grid system that could adapt to various applications from digital platforms to physical installations.',
-        },
-      ],
-    },
-  ],
-  role: 'Art Direction / Brand Design',
-  coverImage: {
-    asset: {
-      _ref: 'image-1',
-      _type: 'reference'
+export default function ProjectDetailPage({ params }: { params: { slug: string } }) {
+  const [project, setProject] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  const loadData = () => {
+    try {
+      // Initialize data if not exists
+      initializeData()
+      
+      // Load project by slug
+      const foundProject = getProjectBySlug(params.slug)
+      
+      if (!foundProject) {
+        // Project not found
+        setProject(null)
+      } else {
+        setProject(foundProject)
+      }
+      
+      setLoading(false)
+    } catch (error) {
+      console.error('Error loading project:', error)
+      setLoading(false)
     }
-  },
-  gallery: [
-    {
-      asset: {
-        _ref: 'image-1',
-        _type: 'reference'
-      }
-    },
-    {
-      asset: {
-        _ref: 'image-2',
-        _type: 'reference'
-      }
-    },
-    {
-      asset: {
-        _ref: 'image-3',
-        _type: 'reference'
-      }
-    },
-  ],
-  backgroundColor: '#FFD700',
-  date: '2024-01-15',
-  externalLink: 'https://example.com',
-}
-
-interface ProjectDetailPageProps {
-  params: {
-    slug: string
   }
-}
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+  useEffect(() => {
+    loadData()
+
+    // Listen for storage changes
+    const handleStorageChange = () => {
+      loadData()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('dataUpdated', handleStorageChange)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('dataUpdated', handleStorageChange)
+    }
+  }, [params.slug])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Proje Bulunamadı</h1>
+          <p className="text-gray-600 mb-8">Aradığınız proje mevcut değil.</p>
+          <Link
+            href="/work"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tüm Projelere Dön
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('tr-TR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
     })
   }
 
@@ -92,139 +101,151 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         transition={{ duration: 0.8 }}
         className="sticky top-0 z-10 bg-white border-b border-gray-200"
       >
-        <div className="container mx-auto px-8 py-6">
-          <Link
-            href="/work"
-            className="inline-flex items-center space-x-2 text-gray-600 hover:text-black transition-colors duration-200"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="font-medium">Back to Work</span>
-          </Link>
+        <div className="max-w-7xl mx-auto px-8 py-6">
+          <div className="flex items-center justify-between">
+            <Link
+              href="/work"
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Tüm Projelere Dön
+            </Link>
+            
+            <div className="hidden lg:block">
+              <Navigation />
+            </div>
+          </div>
         </div>
       </motion.div>
 
-      <div className="container mx-auto px-8 py-12">
-        {/* Cover Image */}
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        {/* Project Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-12"
+          className="mb-16"
         >
-          <div className="relative overflow-hidden rounded-lg">
-            <div 
-              className="w-full h-96 lg:h-[500px] flex items-center justify-center text-white font-bold text-4xl"
-              style={{ backgroundColor: mockProject.backgroundColor || '#f3f4f6' }}
-            >
-              {mockProject.title}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div>
+              <h1 className="text-4xl lg:text-6xl xl:text-7xl text-brutal text-black leading-none mb-6">
+                {project.title}
+              </h1>
+              
+              <div className="space-y-4 text-lg text-gray-600">
+                <div>
+                  <span className="font-semibold text-gray-900">Rol:</span> {project.role}
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-900">Tarih:</span> {formatDate(project.date)}
+                </div>
+                {project.externalLink && (
+                  <div>
+                    <a
+                      href={project.externalLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-black hover:text-gray-600 transition-colors"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Projeyi İncele
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Proje Özeti</h3>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  {project.shortDescription}
+                </p>
+              </div>
+
+              {project.fullDescription && (
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Detaylı Açıklama</h3>
+                  <div className="text-gray-600 leading-relaxed space-y-4">
+                    {typeof project.fullDescription === 'string' ? (
+                      <p>{project.fullDescription}</p>
+                    ) : (
+                      <p>{project.fullDescription}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
+
+        {/* Project Gallery */}
+        {project.gallery && project.gallery.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="mb-16"
+          >
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">Proje Görselleri</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {project.gallery.map((image: string, index: number) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="group cursor-pointer"
+                >
+                  <div className="relative overflow-hidden rounded-lg shadow-lg">
+                    <img
+                      src={image}
+                      alt={`${project.title} - Görsel ${index + 1}`}
+                      className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Project Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16"
-        >
-          <div className="lg:col-span-2">
-            <h1 className="text-4xl lg:text-6xl text-brutal text-black leading-none mb-6">
-              {mockProject.title}
-            </h1>
-            
-            <div className="prose prose-lg max-w-none">
-              {mockProject.fullDescription.map((block, index) => (
-                <p key={index} className="text-gray-700 leading-relaxed mb-4">
-                  {block.children[0].text}
-                </p>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Role
-              </h3>
-              <p className="text-gray-900 font-medium">
-                {mockProject.role}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Date
-              </h3>
-              <p className="text-gray-900 font-medium">
-                {formatDate(mockProject.date)}
-              </p>
-            </div>
-
-            {mockProject.externalLink && (
-              <div>
-                <a
-                  href={mockProject.externalLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                >
-                  <span className="font-medium">View Project</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Gallery */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="space-y-8"
+          className="bg-gray-50 rounded-lg p-8"
         >
-          <h2 className="text-2xl font-bold text-gray-900">
-            Project Gallery
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {mockProject.gallery.map((image, index) => (
-              <div key={index} className="relative overflow-hidden rounded-lg">
-                <div 
-                  className="w-full h-64 lg:h-80 flex items-center justify-center text-gray-500 font-medium hover:scale-105 transition-transform duration-300"
-                  style={{ backgroundColor: mockProject.backgroundColor || '#f3f4f6' }}
-                >
-                  {mockProject.title} - Image {index + 1}
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="mt-16 pt-8 border-t border-gray-200"
-        >
-          <div className="flex justify-between items-center mb-8">
-            <Link
-              href="/work"
-              className="text-gray-600 hover:text-black transition-colors duration-200"
-            >
-              ← All Projects
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Proje Türü</h3>
+              <p className="text-gray-600">{project.role}</p>
+            </div>
             
-            <div className="text-sm text-gray-500">
-              Next: Typography Experiment →
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Tamamlanma Tarihi</h3>
+              <p className="text-gray-600">{formatDate(project.date)}</p>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Durum</h3>
+              <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
+                project.status === 'published' 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {project.status === 'published' ? 'Yayında' : 'Taslak'}
+              </span>
             </div>
           </div>
-          
-          <Navigation />
         </motion.div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

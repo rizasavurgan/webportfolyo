@@ -1,9 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
 import SocialLinks from '@/components/SocialLinks'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
+import Footer from '@/components/Footer'
+import { getSiteSettings, initializeData } from '@/lib/data'
 
 // Mock data - will be replaced with Sanity CMS data
 const mockAbout = {
@@ -53,6 +56,59 @@ const mockSocialLinks = [
 ]
 
 export default function MePage() {
+  const [siteSettings, setSiteSettings] = useState<any>({})
+  const [socialLinks, setSocialLinks] = useState<any[]>([])
+
+  const loadData = () => {
+    try {
+      // Initialize data if not exists
+      initializeData()
+      
+      // Load site settings
+      const siteSettingsData = getSiteSettings()
+      setSiteSettings(siteSettingsData)
+      setSocialLinks(siteSettingsData.socialLinks)
+    } catch (error) {
+      console.error('Error loading about data:', error)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+
+    // Listen for storage changes
+    const handleStorageChange = (e: any) => {
+      console.log('About page - Storage changed:', e.key)
+      if (e.key === 'refreshSite' || e.key?.includes('portfolio_')) {
+        console.log('About page - Refreshing data...')
+        loadData()
+      }
+    }
+
+    const handleCustomEvent = () => {
+      console.log('About page - Custom event received')
+      loadData()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('dataUpdated', handleCustomEvent)
+
+    // Check for refresh token every second
+    const refreshInterval = setInterval(() => {
+      const refreshToken = localStorage.getItem('refreshSite')
+      if (refreshToken) {
+        localStorage.removeItem('refreshSite')
+        console.log('About page - Refresh token found, reloading data...')
+        loadData()
+      }
+    }, 1000)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('dataUpdated', handleCustomEvent)
+      clearInterval(refreshInterval)
+    }
+  }, [])
   return (
     <div className="min-h-screen bg-white">
       {/* Overlay Text */}
@@ -128,7 +184,7 @@ export default function MePage() {
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
                     Connect
                   </h3>
-                  <SocialLinks links={mockSocialLinks} />
+                  <SocialLinks links={socialLinks} />
                 </div>
               </div>
             </motion.div>
@@ -168,6 +224,9 @@ export default function MePage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }
