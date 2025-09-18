@@ -56,16 +56,17 @@ async function readFromFile<T>(filename: string, defaultValue: T): Promise<T> {
       return defaultValue
     }
   } else {
-    // Client-side: use fetch
+    // Client-side: use API route
     try {
-      const response = await fetch(`/data/${filename}`)
+      console.log(`Fetching data for ${filename}`)
+      const response = await fetch(`/api/get-data?filename=${filename}`)
       if (!response.ok) {
         console.log(`File ${filename} not found, using default data`)
         return defaultValue
       }
       return await response.json()
     } catch (error) {
-      console.log(`Error loading ${filename}, using default data`)
+      console.log(`Error loading ${filename}, using default data:`, error)
       return defaultValue
     }
   }
