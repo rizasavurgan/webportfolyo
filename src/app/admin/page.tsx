@@ -3,28 +3,52 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Lock, User, Eye } from 'lucide-react'
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth'
 
 export default function AdminLogin() {
+  const { login, isAuthenticated, isLoading: authLoading } = useFirebaseAuth()
   const [credentials, setCredentials] = useState({
-    username: '',
+    email: '',
     password: ''
   })
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
     
-    // Basit authentication (production'da daha güvenli olmalı)
-    if (credentials.username === 'admin' && credentials.password === 'admin123') {
-      localStorage.setItem('adminAuth', 'true')
-      window.location.href = '/admin/dashboard'
-    } else {
-      alert('Geçersiz kullanıcı adı veya şifre')
+    try {
+      const result = await login(credentials.email, credentials.password)
+      if (result.success) {
+        window.location.href = '/admin/dashboard'
+      } else {
+        setError(result.error || 'Giriş başarısız')
+      }
+    } catch (error) {
+      setError('Bir hata oluştu')
     }
     
     setIsLoading(false)
+  }
+
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    window.location.href = '/admin/dashboard'
+    return null
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -64,14 +88,14 @@ export default function AdminLogin() {
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
+                  id="email"
+                  name="email"
+                  type="email"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-                  placeholder="Kullanıcı adı"
-                  value={credentials.username}
-                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                  placeholder="E-posta adresi"
+                  value={credentials.email}
+                  onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
                 />
               </div>
             </div>
@@ -119,10 +143,15 @@ export default function AdminLogin() {
             </motion.button>
           </div>
 
+          {error && (
+            <div className="text-center text-sm text-red-600 bg-red-50 p-3 rounded-md">
+              {error}
+            </div>
+          )}
+          
           <div className="text-center text-sm text-gray-500">
-            <p>Demo giriş bilgileri:</p>
-            <p>Kullanıcı: <strong>admin</strong></p>
-            <p>Şifre: <strong>admin123</strong></p>
+            <p>Firebase Authentication aktif</p>
+            <p>Firebase Console'dan admin kullanıcısı oluşturun</p>
           </div>
         </motion.form>
       </div>

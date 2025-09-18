@@ -16,12 +16,12 @@ import {
   LogOut,
   Eye
 } from 'lucide-react'
-import { getProjects, Project } from '@/lib/data'
+import { getProjects, Project } from '@/lib/firebase-data'
 import StorageInfo from '@/components/StorageInfo'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth'
 
 export default function AdminDashboard() {
-  const { isAuthenticated, isLoading: authLoading, logout } = useAdminAuth()
+  const { isAuthenticated, isLoading: authLoading, logout } = useFirebaseAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [isDataLoading, setIsDataLoading] = useState(true)
   const [stats, setStats] = useState({
