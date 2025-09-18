@@ -8,55 +8,22 @@ import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import { getSiteSettings, getAboutContent, SiteSettings, AboutContent } from '@/lib/data'
 
-// Mock data - will be replaced with Sanity CMS data
-const mockAbout = {
-  name: 'Rıza Savurgan',
-  bio: [
-    {
-      _type: 'block',
-      children: [
-        {
-          _type: 'span',
-          text: 'I am a designer based in Istanbul, specializing in brutalist design principles and typography-focused solutions. With over 5 years of experience in the creative industry, I have worked with clients ranging from startups to established brands.',
-        },
-      ],
-    },
-    {
-      _type: 'block',
-      children: [
-        {
-          _type: 'span',
-          text: 'My approach to design is rooted in the belief that form should follow function, but not at the expense of visual impact. I create bold, uncompromising designs that challenge conventional aesthetics while maintaining usability and accessibility.',
-        },
-      ],
-    },
-    {
-      _type: 'block',
-      children: [
-        {
-          _type: 'span',
-          text: 'Currently, I am freelancing and open to new projects that push the boundaries of design. I believe in the power of design to communicate complex ideas and create meaningful connections between brands and their audiences.',
-        },
-      ],
-    },
-  ],
-  profileImage: {
-    asset: {
-      _ref: 'profile-image',
-      _type: 'reference'
-    }
-  },
-}
+// This will be replaced with data from admin panel
 
 
 export default function MePage() {
   const [socialLinks, setSocialLinks] = useState<Array<{platform: string, url: string}>>([])
+  const [aboutContent, setAboutContent] = useState<AboutContent | null>(null)
 
   const loadData = async () => {
     try {
-      // Load site settings
-      const siteSettingsData = await getSiteSettings()
+      // Load site settings and about content
+      const [siteSettingsData, aboutData] = await Promise.all([
+        getSiteSettings(),
+        getAboutContent()
+      ])
       setSocialLinks(siteSettingsData.socialLinks)
+      setAboutContent(aboutData)
     } catch (error) {
       console.error('Error loading about data:', error)
     }
@@ -137,7 +104,7 @@ export default function MePage() {
             >
               <div>
                 <h1 className="text-4xl lg:text-6xl text-brutal text-black leading-none mb-6">
-                  {mockAbout.name}
+                  {aboutContent?.name || 'Rıza Savurgan'}
                 </h1>
                 <p className="text-lg text-gray-600 font-medium">
                   Designer & Creative Director
@@ -145,11 +112,15 @@ export default function MePage() {
               </div>
 
               <div className="prose prose-lg max-w-none">
-                {mockAbout.bio.map((block, index) => (
+                {aboutContent?.bio?.map((bioText, index) => (
                   <p key={index} className="text-gray-700 leading-relaxed mb-6">
-                    {block.children[0].text}
+                    {bioText}
                   </p>
-                ))}
+                )) || (
+                  <p className="text-gray-700 leading-relaxed mb-6">
+                    I am a designer based in Istanbul, specializing in brutalist design principles and typography-focused solutions.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-6">
@@ -158,7 +129,14 @@ export default function MePage() {
                     Expertise
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {['Brand Identity', 'Typography', 'Web Design', 'Art Direction', 'UI/UX Design', 'Editorial Design'].map((skill) => (
+                    {aboutContent?.skills?.map((skill) => (
+                      <span
+                        key={skill.name}
+                        className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full"
+                      >
+                        {skill.name}
+                      </span>
+                    )) || ['Brand Identity', 'Typography', 'Web Design', 'Art Direction', 'UI/UX Design', 'Editorial Design'].map((skill) => (
                       <span
                         key={skill}
                         className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full"

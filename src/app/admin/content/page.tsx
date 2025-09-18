@@ -31,11 +31,41 @@ export default function AdminContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [content, setContent] = useState<AboutContent>({
     name: 'Rıza Savurgan',
-    bio: ['Creative designer based in Istanbul', 'Specialized in brutalist design and typography'],
+    bio: [
+      'I am a designer based in Istanbul, specializing in brutalist design principles and typography-focused solutions. With over 5 years of experience in the creative industry, I have worked with clients ranging from startups to established brands.',
+      'My approach to design is rooted in the belief that form should follow function, but not at the expense of visual impact. I create bold, uncompromising designs that challenge conventional aesthetics while maintaining usability and accessibility.',
+      'Currently, I am freelancing and open to new projects that push the boundaries of design. I believe in the power of design to communicate complex ideas and create meaningful connections between brands and their audiences.'
+    ],
     profileImage: '',
-    skills: [],
-    experience: [],
-    education: []
+    skills: [
+      { name: 'Brand Identity', level: 95 },
+      { name: 'Typography', level: 90 },
+      { name: 'Web Design', level: 85 },
+      { name: 'Art Direction', level: 88 },
+      { name: 'UI/UX Design', level: 82 },
+      { name: 'Editorial Design', level: 80 }
+    ],
+    experience: [
+      {
+        title: 'Senior Designer',
+        company: 'Creative Studio Istanbul',
+        period: '2020-2024',
+        description: 'Led design projects for major brands, focusing on brand identity and digital experiences.'
+      },
+      {
+        title: 'Freelance Designer',
+        company: 'Self-Employed',
+        period: '2019-Present',
+        description: 'Working with various clients on brand identity, web design, and print projects.'
+      }
+    ],
+    education: [
+      {
+        degree: 'Bachelor of Fine Arts',
+        school: 'Istanbul University',
+        year: '2019'
+      }
+    ]
   })
 
   useEffect(() => {

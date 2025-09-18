@@ -47,9 +47,10 @@ export default function AdminDashboard() {
     setIsLoading(false)
   }, [])
 
-  const loadProjects = () => {
+  const loadProjects = async () => {
     try {
-      const projectsData = JSON.parse(localStorage.getItem('portfolio_projects') || '[]')
+      const { getProjects } = await import('@/lib/data')
+      const projectsData = await getProjects()
       setProjects(projectsData)
     } catch (error) {
       console.error('Error loading projects:', error)

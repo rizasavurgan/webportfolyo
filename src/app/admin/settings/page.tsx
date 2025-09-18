@@ -34,10 +34,15 @@ export default function AdminSettings() {
     siteDescription: 'Designer & Developer based in Istanbul',
     logo: '',
     footerText: '© 2024 Rıza Savurgan. All rights reserved.',
-    socialLinks: [],
+    socialLinks: [
+      { platform: 'Instagram', url: 'https://instagram.com/rizasavurgan' },
+      { platform: 'Behance', url: 'https://behance.net/rizasavurgan' },
+      { platform: 'LinkedIn', url: 'https://linkedin.com/in/rizasavurgan' },
+      { platform: 'Twitter', url: 'https://twitter.com/rizasavurgan' }
+    ],
     contactInfo: {
-      email: '',
-      phone: '',
+      email: 'hello@rizasavurgan.com',
+      phone: '+90 555 123 45 67',
       location: 'Istanbul, Turkey'
     },
     seo: {
