@@ -192,6 +192,18 @@ export async function saveAboutContent(content: AboutContent): Promise<boolean> 
   return await saveToFile('about-content.json', content)
 }
 
+// Get project by slug
+export async function getProjectBySlug(slug: string): Promise<Project | null> {
+  try {
+    const projects = await getProjects()
+    const project = projects.find(p => p.slug?.current === slug)
+    return project || null
+  } catch (error) {
+    console.error('Error loading project by slug:', error)
+    return null
+  }
+}
+
 // Initialize data if not exists
 export function initializeData() {
   // This function is kept for compatibility but doesn't do anything

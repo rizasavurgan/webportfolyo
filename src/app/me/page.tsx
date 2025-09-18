@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { Edit } from 'lucide-react'
 import SocialLinks from '@/components/SocialLinks'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
@@ -73,7 +75,16 @@ export default function MePage() {
       
       {/* Mobile Navigation */}
       <div className="lg:hidden px-8 py-6 border-b border-gray-200">
-        <Navigation />
+        <div className="flex justify-between items-center">
+          <Navigation />
+          <Link
+            href="/admin/content"
+            className="inline-flex items-center px-3 py-2 border border-black text-sm font-bold rounded-none text-black bg-white hover:bg-black hover:text-white transition-colors"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Link>
+        </div>
       </div>
       
       <div className="flex min-h-screen">
@@ -185,9 +196,16 @@ export default function MePage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="sticky top-20"
+            className="sticky top-20 space-y-4"
           >
             <Navigation />
+            <Link
+              href="/admin/content"
+              className="inline-flex items-center px-4 py-2 border-2 border-black text-sm font-bold rounded-none text-black bg-white hover:bg-black hover:text-white transition-colors"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Content
+            </Link>
           </motion.div>
         </div>
       </div>

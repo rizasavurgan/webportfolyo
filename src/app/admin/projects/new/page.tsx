@@ -445,9 +445,29 @@ export default function NewProjectPage() {
                   onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) {
+                      // Check file size (max 5MB)
+                      if (file.size > 5 * 1024 * 1024) {
+                        alert('Dosya boyutu çok büyük! Maksimum 5MB olmalı.')
+                        return
+                      }
+                      
+                      // Check file type
+                      if (!file.type.startsWith('image/')) {
+                        alert('Lütfen sadece görsel dosyaları seçin!')
+                        return
+                      }
+                      
                       const reader = new FileReader()
                       reader.onload = (e) => {
-                        setProject(prev => ({ ...prev, coverImage: e.target?.result as string }))
+                        const result = e.target?.result as string
+                        if (result) {
+                          console.log('Cover image loaded:', file.name, 'Size:', result.length)
+                          setProject(prev => ({ ...prev, coverImage: result }))
+                        }
+                      }
+                      reader.onerror = () => {
+                        console.error('Error loading cover image:', file.name)
+                        alert('Görsel yüklenirken hata oluştu!')
                       }
                       reader.readAsDataURL(file)
                     }
