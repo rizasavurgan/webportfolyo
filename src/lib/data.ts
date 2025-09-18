@@ -18,41 +18,26 @@ async function ensureDataDir() {
 
 // Helper function to save data to JSON files
 async function saveToFile(filename: string, data: any) {
-  // Check if we're on the server or client
-  if (typeof window === 'undefined') {
-    // Server-side: use file system
-    try {
-      await ensureDataDir()
-      const filePath = path.join(DATA_DIR, filename)
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8')
-      console.log(`Data saved to ${filePath}`)
-      return true
-    } catch (error) {
-      console.error('Error saving data:', error)
-      return false
+  // Always use API route for saving data (works on both client and server)
+  try {
+    const response = await fetch('/api/save-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filename, data }),
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Failed to save data: ${response.status}`)
     }
-  } else {
-    // Client-side: use API route
-    try {
-      const response = await fetch('/api/save-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ filename, data }),
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Failed to save data: ${response.status}`)
-      }
-      
-      const result = await response.json()
-      console.log('Data saved via API:', result)
-      return true
-    } catch (error) {
-      console.error('Error saving data via API:', error)
-      return false
-    }
+    
+    const result = await response.json()
+    console.log('Data saved via API:', result)
+    return true
+  } catch (error) {
+    console.error('Error saving data via API:', error)
+    return false
   }
 }
 

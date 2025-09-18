@@ -9,6 +9,10 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Enable server-side rendering for Vercel
+  experimental: {
+    serverComponentsExternalPackages: ['fs']
+  }
 }
 
 module.exports = nextConfig
