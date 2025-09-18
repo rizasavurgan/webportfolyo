@@ -18,10 +18,10 @@ import {
 } from 'lucide-react'
 import { getProjects, Project } from '@/lib/data'
 import StorageInfo from '@/components/StorageInfo'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 export default function AdminDashboard() {
-  const { isAuthenticated, isLoading: authLoading, logout } = useAdminAuth()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [projects, setProjects] = useState<Project[]>([])
   const [isDataLoading, setIsDataLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -31,12 +31,40 @@ export default function AdminDashboard() {
     lastUpdate: '2 saat önce'
   })
 
+  // Authentication check
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setIsLoading(false)
+      return
+    }
+
+    const auth = localStorage.getItem('adminAuth')
+    if (auth === 'true') {
+      setIsAuthenticated(true)
+    } else {
+      window.location.href = '/admin'
+    }
+    
+    setIsLoading(false)
+  }, [])
+
+  const logout = () => {
+    localStorage.removeItem('adminAuth')
+    window.location.href = '/admin'
+  }
+
   useEffect(() => {
     if (!isAuthenticated) return
 
     // Load projects data
     const loadData = () => {
       try {
+        // Initialize data if not exists
+        if (typeof window !== 'undefined') {
+          const { initializeData } = require('@/lib/data')
+          initializeData()
+        }
+        
         const projectsData = getProjects()
         setProjects(projectsData)
         setStats({
@@ -56,7 +84,7 @@ export default function AdminDashboard() {
     loadData()
   }, [isAuthenticated])
 
-  if (!isAuthenticated || authLoading || isDataLoading) {
+  if (isLoading || !isAuthenticated || isDataLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
