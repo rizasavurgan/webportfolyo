@@ -1,21 +1,80 @@
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import { getProjectBySlug, Project } from '@/lib/data'
-import { notFound } from 'next/navigation'
 
-interface Props {
-  params: Promise<{ slug: string }>
-}
+export default function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const [project, setProject] = useState<Project | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [slug, setSlug] = useState<string>('')
 
-export default async function ProjectDetailPage({ params }: Props) {
-  const resolvedParams = await params
-  const project = await getProjectBySlug(resolvedParams.slug)
+  const loadData = useCallback(async () => {
+    try {
+      console.log('Loading project for slug:', slug)
+      
+      // Load project by slug
+      const foundProject = await getProjectBySlug(slug)
+      console.log('Found project:', foundProject)
+      
+      if (!foundProject) {
+        // Project not found
+        setProject(null)
+      } else {
+        setProject(foundProject)
+      }
+      
+      setLoading(false)
+    } catch (error) {
+      console.error('Error loading project:', error)
+      setLoading(false)
+    }
+  }, [slug])
+
+  useEffect(() => {
+    // Resolve params
+    params.then(resolvedParams => {
+      setSlug(resolvedParams.slug)
+    })
+  }, [params])
+
+  useEffect(() => {
+    if (slug) {
+      loadData()
+    }
+  }, [slug, loadData])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!project) {
-    notFound()
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Proje Bulunamadı</h1>
+          <p className="text-gray-600 mb-8">Aradığınız proje mevcut değil.</p>
+          <Link
+            href="/work"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tüm Projelere Dön
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   const formatDate = (dateString: string) => {

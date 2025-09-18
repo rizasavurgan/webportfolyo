@@ -20,8 +20,6 @@ async function ensureDataDir() {
 async function saveToFile(filename: string, data: any) {
   // Always use API route for saving data (works on both client and server)
   try {
-    console.log(`Attempting to save ${filename} with data:`, data)
-    
     const response = await fetch('/api/save-data', {
       method: 'POST',
       headers: {
@@ -30,12 +28,8 @@ async function saveToFile(filename: string, data: any) {
       body: JSON.stringify({ filename, data }),
     })
     
-    console.log(`API response status: ${response.status}`)
-    
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`API error response: ${errorText}`)
-      throw new Error(`Failed to save data: ${response.status} - ${errorText}`)
+      throw new Error(`Failed to save data: ${response.status}`)
     }
     
     const result = await response.json()
