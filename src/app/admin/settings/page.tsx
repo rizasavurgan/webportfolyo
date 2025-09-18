@@ -62,15 +62,16 @@ export default function AdminSettings() {
     }
     
     // Load existing settings
-    const loadSettings = async () => {
-      try {
-        const { getSiteSettings } = await import('@/lib/data')
-        const savedSettings = await getSiteSettings()
-        setSettings(savedSettings)
-      } catch (error) {
-        console.error('Error loading settings:', error)
-      }
+  const loadSettings = async () => {
+    try {
+      const { getSiteSettings } = await import('@/lib/data')
+      const savedSettings = await getSiteSettings()
+      setSettings(savedSettings)
+    } catch (error) {
+      console.error('Error loading settings:', error)
+      // Keep default settings if loading fails
     }
+  }
     
     loadSettings()
     

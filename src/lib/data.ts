@@ -18,28 +18,71 @@ async function ensureDataDir() {
 
 // Helper function to save data to JSON files
 async function saveToFile(filename: string, data: any) {
-  try {
-    await ensureDataDir()
-    const filePath = path.join(DATA_DIR, filename)
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8')
-    console.log(`Data saved to ${filePath}`)
-    return true
-  } catch (error) {
-    console.error('Error saving data:', error)
-    return false
+  // Check if we're on the server or client
+  if (typeof window === 'undefined') {
+    // Server-side: use file system
+    try {
+      await ensureDataDir()
+      const filePath = path.join(DATA_DIR, filename)
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8')
+      console.log(`Data saved to ${filePath}`)
+      return true
+    } catch (error) {
+      console.error('Error saving data:', error)
+      return false
+    }
+  } else {
+    // Client-side: use API route
+    try {
+      const response = await fetch('/api/save-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filename, data }),
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to save data: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      console.log('Data saved via API:', result)
+      return true
+    } catch (error) {
+      console.error('Error saving data via API:', error)
+      return false
+    }
   }
 }
 
 // Helper function to read data from JSON files
 async function readFromFile<T>(filename: string, defaultValue: T): Promise<T> {
-  try {
-    await ensureDataDir()
-    const filePath = path.join(DATA_DIR, filename)
-    const data = await fs.readFile(filePath, 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.log(`File ${filename} not found, using default data`)
-    return defaultValue
+  // Check if we're on the server or client
+  if (typeof window === 'undefined') {
+    // Server-side: use file system
+    try {
+      await ensureDataDir()
+      const filePath = path.join(DATA_DIR, filename)
+      const data = await fs.readFile(filePath, 'utf8')
+      return JSON.parse(data)
+    } catch (error) {
+      console.log(`File ${filename} not found, using default data`)
+      return defaultValue
+    }
+  } else {
+    // Client-side: use fetch
+    try {
+      const response = await fetch(`/data/${filename}`)
+      if (!response.ok) {
+        console.log(`File ${filename} not found, using default data`)
+        return defaultValue
+      }
+      return await response.json()
+    } catch (error) {
+      console.log(`Error loading ${filename}, using default data`)
+      return defaultValue
+    }
   }
 }
 
