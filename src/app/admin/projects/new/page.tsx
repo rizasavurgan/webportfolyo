@@ -118,10 +118,12 @@ export default function NewProjectPage() {
       const updatedProjects = [...existingProjects, newProject]
 
       // Save to JSON file
+      console.log('Saving project:', newProject)
       const success = await saveProjects(updatedProjects)
+      console.log('Save result:', success)
 
       if (!success) {
-        alert('Proje kaydedilirken bir hata oluştu!')
+        alert('Proje kaydedilirken bir hata oluştu! Lütfen konsolu kontrol edin.')
         setIsLoading(false)
         return
       }
