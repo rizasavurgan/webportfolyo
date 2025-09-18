@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getProjectBySlug, initializeData, Project } from '@/lib/data'
+import { getProjectBySlug, initializeData, Project, getProjects } from '@/lib/data'
+
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const [project, setProject] = useState<Project | null>(null)

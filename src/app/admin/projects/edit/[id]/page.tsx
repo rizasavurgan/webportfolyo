@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react'
 import { getProjects, saveProjects, Project, initializeData } from '@/lib/data'
 
+
 export default function EditProjectPage() {
   const params = useParams()
   const router = useRouter()
