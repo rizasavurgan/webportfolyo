@@ -63,11 +63,24 @@ export default function AdminDashboard() {
     window.location.href = '/admin'
   }
 
-  const deleteProject = (id: string) => {
+  const deleteProject = async (id: string) => {
     if (confirm('Bu projeyi silmek istediğinizden emin misiniz?')) {
-      const updatedProjects = projects.filter(project => project._id !== id)
-      localStorage.setItem('portfolio_projects', JSON.stringify(updatedProjects))
-      setProjects(updatedProjects)
+      try {
+        const { getProjects, saveProjects } = await import('@/lib/data')
+        const allProjects = await getProjects()
+        const updatedProjects = allProjects.filter(project => project._id !== id)
+        const success = await saveProjects(updatedProjects)
+        
+        if (success) {
+          setProjects(updatedProjects)
+          alert('Proje başarıyla silindi!')
+        } else {
+          alert('Proje silinirken bir hata oluştu!')
+        }
+      } catch (error) {
+        console.error('Error deleting project:', error)
+        alert('Proje silinirken bir hata oluştu!')
+      }
     }
   }
 
