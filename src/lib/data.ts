@@ -1,20 +1,5 @@
 // Data management utilities for admin panel and site
-// Using server-side JSON files for shared data
-
-import { promises as fs } from 'fs'
-import path from 'path'
-
-// Data directory path
-const DATA_DIR = path.join(process.cwd(), 'public', 'data')
-
-// Ensure data directory exists
-async function ensureDataDir() {
-  try {
-    await fs.access(DATA_DIR)
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true })
-  }
-}
+// Using API routes for all data operations
 
 // Helper function to save data to JSON files
 async function saveToFile(filename: string, data: any) {
@@ -43,32 +28,18 @@ async function saveToFile(filename: string, data: any) {
 
 // Helper function to read data from JSON files
 async function readFromFile<T>(filename: string, defaultValue: T): Promise<T> {
-  // Check if we're on the server or client
-  if (typeof window === 'undefined') {
-    // Server-side: use file system
-    try {
-      await ensureDataDir()
-      const filePath = path.join(DATA_DIR, filename)
-      const data = await fs.readFile(filePath, 'utf8')
-      return JSON.parse(data)
-    } catch (error) {
+  // Always use API route for reading data (works on both client and server)
+  try {
+    console.log(`Fetching data for ${filename}`)
+    const response = await fetch(`/api/get-data?filename=${filename}`)
+    if (!response.ok) {
       console.log(`File ${filename} not found, using default data`)
       return defaultValue
     }
-  } else {
-    // Client-side: use API route
-    try {
-      console.log(`Fetching data for ${filename}`)
-      const response = await fetch(`/api/get-data?filename=${filename}`)
-      if (!response.ok) {
-        console.log(`File ${filename} not found, using default data`)
-        return defaultValue
-      }
-      return await response.json()
-    } catch (error) {
-      console.log(`Error loading ${filename}, using default data:`, error)
-      return defaultValue
-    }
+    return await response.json()
+  } catch (error) {
+    console.log(`Error loading ${filename}, using default data:`, error)
+    return defaultValue
   }
 }
 

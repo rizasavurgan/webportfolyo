@@ -100,7 +100,7 @@ export default function MePage() {
             >
               <div className="relative">
                 <div className="w-full h-96 lg:h-[500px] bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 font-medium text-2xl rounded-lg">
-                  {mockAbout.name}
+                  {aboutContent?.name || 'Rıza Savurgan'}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
               </div>
