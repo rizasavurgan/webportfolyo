@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react'
-import { getProjects, saveProject, Project } from '@/lib/firebase-data'
-import { useFirebaseAuth } from '@/hooks/useFirebaseAuth'
+import { getProjects, saveProjects, Project, initializeData } from '@/lib/data'
 
 export default function NewProjectPage() {
-  const { isAuthenticated, isLoading: authLoading } = useFirebaseAuth()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [project, setProject] = useState({
     title: '',
@@ -25,12 +24,21 @@ export default function NewProjectPage() {
     views: 0
   })
 
-  // Redirect if not authenticated
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    // Wait for client-side hydration
+    if (typeof window === 'undefined') return
+    
+    const auth = localStorage.getItem('adminAuth')
+    if (!auth) {
       window.location.href = '/admin'
+      return
     }
-  }, [isAuthenticated, authLoading])
+    
+    // Initialize data if not exists
+    initializeData()
+    
+    setIsAuthenticated(true)
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -63,8 +71,12 @@ export default function NewProjectPage() {
     setIsLoading(true)
     
     try {
+      // Generate unique ID
+      const newId = Date.now().toString()
+      
       // Create project object
-      const newProject = {
+      const newProject: Project = {
+        _id: newId,
         title: project.title,
         slug: { current: project.slug },
         shortDescription: project.shortDescription,
@@ -73,21 +85,39 @@ export default function NewProjectPage() {
         backgroundColor: project.backgroundColor,
         date: project.date,
         status: project.status,
-        coverImage: project.coverImage,
+        coverImage: project.coverImage ? {
+          asset: {
+            _ref: project.coverImage,
+            _type: 'reference'
+          }
+        } : undefined,
         gallery: project.gallery,
         externalLink: project.externalLink,
         views: project.views
       }
       
-      // Save to Firebase
-      const projectId = await saveProject(newProject)
+      // Get existing projects and add new one
+      const existingProjects = getProjects()
+      const updatedProjects = [...existingProjects, newProject]
       
-      if (projectId) {
-        alert('Proje başarıyla kaydedildi!')
-        window.location.href = '/admin/projects'
-      } else {
-        alert('Proje kaydedilirken bir hata oluştu!')
+      // Save to localStorage with quota checking
+      const success = saveProjects(updatedProjects)
+      
+      if (!success) {
+        alert('Storage quota exceeded! Please clean up old data or reduce image sizes.')
+        setIsLoading(false)
+        return
       }
+      
+      // Dispatch custom event to notify other tabs
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('dataUpdated'))
+        // Also try to refresh other tabs
+        localStorage.setItem('refreshSite', Date.now().toString())
+      }
+      
+      alert('Proje başarıyla kaydedildi!\n\nSite sayfasını yenilemek için:\n1. Site sekmesine geçin\n2. Sayfayı yenileyin (F5)\n3. Yeni projeyi göreceksiniz!')
+      window.location.href = '/admin/projects'
     } catch (error) {
       console.error('Error saving project:', error)
       alert('Proje kaydedilirken bir hata oluştu!')
@@ -105,8 +135,12 @@ export default function NewProjectPage() {
     setIsLoading(true)
     
     try {
+      // Generate unique ID
+      const newId = Date.now().toString()
+      
       // Create project object with published status
-      const newProject = {
+      const newProject: Project = {
+        _id: newId,
         title: project.title,
         slug: { current: project.slug },
         shortDescription: project.shortDescription,
@@ -114,22 +148,40 @@ export default function NewProjectPage() {
         role: project.role,
         backgroundColor: project.backgroundColor,
         date: project.date,
-        status: 'published' as const,
-        coverImage: project.coverImage,
+        status: 'published',
+        coverImage: project.coverImage ? {
+          asset: {
+            _ref: project.coverImage,
+            _type: 'reference'
+          }
+        } : undefined,
         gallery: project.gallery,
         externalLink: project.externalLink,
         views: project.views
       }
       
-      // Save to Firebase
-      const projectId = await saveProject(newProject)
+      // Get existing projects and add new one
+      const existingProjects = getProjects()
+      const updatedProjects = [...existingProjects, newProject]
       
-      if (projectId) {
-        alert('Proje başarıyla yayınlandı!')
-        window.location.href = '/admin/projects'
-      } else {
-        alert('Proje yayınlanırken bir hata oluştu!')
+      // Save to localStorage with quota checking
+      const success = saveProjects(updatedProjects)
+      
+      if (!success) {
+        alert('Storage quota exceeded! Please clean up old data or reduce image sizes.')
+        setIsLoading(false)
+        return
       }
+      
+      // Dispatch custom event to notify other tabs
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('dataUpdated'))
+        // Also try to refresh other tabs
+        localStorage.setItem('refreshSite', Date.now().toString())
+      }
+      
+      alert('Proje başarıyla yayınlandı!\n\nSite sayfasını yenilemek için:\n1. Site sekmesine geçin\n2. Sayfayı yenileyin (F5)\n3. Yeni projeyi göreceksiniz!')
+      window.location.href = '/admin/projects'
     } catch (error) {
       console.error('Error publishing project:', error)
       alert('Proje yayınlanırken bir hata oluştu!')
@@ -138,15 +190,8 @@ export default function NewProjectPage() {
     setIsLoading(false)
   }
 
-  if (authLoading || !isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
-          <p className="text-gray-600">Yükleniyor...</p>
-        </div>
-      </div>
-    )
+  if (!isAuthenticated) {
+    return <div>Yükleniyor...</div>
   }
 
   return (

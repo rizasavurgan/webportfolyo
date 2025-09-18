@@ -16,12 +16,12 @@ import {
   LogOut,
   Eye
 } from 'lucide-react'
-import { getProjects, Project } from '@/lib/firebase-data'
+import { getProjects, Project } from '@/lib/data'
 import StorageInfo from '@/components/StorageInfo'
-import { useFirebaseAuth } from '@/hooks/useFirebaseAuth'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 export default function AdminDashboard() {
-  const { isAuthenticated, isLoading: authLoading, logout } = useFirebaseAuth()
+  const { isAuthenticated, isLoading: authLoading, logout } = useAdminAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [isDataLoading, setIsDataLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -35,9 +35,9 @@ export default function AdminDashboard() {
     if (!isAuthenticated) return
 
     // Load projects data
-    const loadData = async () => {
+    const loadData = () => {
       try {
-        const projectsData = await getProjects()
+        const projectsData = getProjects()
         setProjects(projectsData)
         setStats({
           totalProjects: projectsData.length,
