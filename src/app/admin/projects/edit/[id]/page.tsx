@@ -17,6 +17,9 @@ export default function EditProjectPage() {
   const [project, setProject] = useState<Project & { coverImage: string; gallery: string[] } | null>(null)
 
   useEffect(() => {
+    // Wait for client-side hydration
+    if (typeof window === 'undefined') return
+    
     const auth = localStorage.getItem('adminAuth')
     if (!auth) {
       window.location.href = '/admin'

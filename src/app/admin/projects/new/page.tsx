@@ -25,14 +25,17 @@ export default function NewProjectPage() {
   })
 
   useEffect(() => {
+    // Wait for client-side hydration
+    if (typeof window === 'undefined') return
+    
     const auth = localStorage.getItem('adminAuth')
     if (!auth) {
       window.location.href = '/admin'
       return
     }
     
-            // Initialize data if not exists
-            initializeData()
+    // Initialize data if not exists
+    initializeData()
     
     setIsAuthenticated(true)
   }, [])

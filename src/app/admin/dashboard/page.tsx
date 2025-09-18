@@ -18,10 +18,12 @@ import {
 } from 'lucide-react'
 import { getProjects, initializeData, Project } from '@/lib/data'
 import StorageInfo from '@/components/StorageInfo'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 export default function AdminDashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { isAuthenticated, isLoading: authLoading, logout } = useAdminAuth()
   const [projects, setProjects] = useState<Project[]>([])
+  const [isDataLoading, setIsDataLoading] = useState(true)
   const [stats, setStats] = useState({
     totalProjects: 0,
     totalMessages: 12,
@@ -30,14 +32,7 @@ export default function AdminDashboard() {
   })
 
   useEffect(() => {
-    // Authentication kontrolü
-    const auth = localStorage.getItem('adminAuth')
-    if (!auth) {
-      window.location.href = '/admin'
-      return
-    }
-    
-    setIsAuthenticated(true)
+    if (!isAuthenticated) return
 
     // Load projects data
     const loadData = async () => {
@@ -56,19 +51,23 @@ export default function AdminDashboard() {
       } catch (error) {
         console.error('Error loading projects:', error)
         setProjects([])
+      } finally {
+        setIsDataLoading(false)
       }
     }
 
     loadData()
-  }, [])
+  }, [isAuthenticated])
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminAuth')
-    window.location.href = '/admin'
-  }
-
-  if (!isAuthenticated) {
-    return <div>Yükleniyor...</div>
+  if (!isAuthenticated || authLoading || isDataLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -101,7 +100,7 @@ export default function AdminDashboard() {
                 🔄 Siteyi Yenile
               </button>
               <button
-                onClick={handleLogout}
+                onClick={logout}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
               >
                 <LogOut className="h-4 w-4 mr-2" />

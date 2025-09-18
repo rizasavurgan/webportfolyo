@@ -33,6 +33,9 @@ export default function SettingsPage() {
   })
 
   useEffect(() => {
+    // Wait for client-side hydration
+    if (typeof window === 'undefined') return
+    
     const auth = localStorage.getItem('adminAuth')
     if (!auth) {
       window.location.href = '/admin'

@@ -19,8 +19,12 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Wait for client-side hydration
+    if (typeof window === 'undefined') return
+    
     const auth = localStorage.getItem('adminAuth')
     if (!auth) {
       window.location.href = '/admin'
@@ -28,19 +32,21 @@ export default function ProjectsPage() {
     }
     setIsAuthenticated(true)
 
-            // Load projects from localStorage
-            const loadData = async () => {
-              try {
-                // Initialize data if not exists
-                initializeData()
+    // Load projects from localStorage
+    const loadData = async () => {
+      try {
+        // Initialize data if not exists
+        initializeData()
 
-                const projectsData = getProjects()
-                setProjects(projectsData)
-              } catch (error) {
-                console.error('Error loading projects:', error)
-                setProjects([])
-              }
-            }
+        const projectsData = getProjects()
+        setProjects(projectsData)
+      } catch (error) {
+        console.error('Error loading projects:', error)
+        setProjects([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
     loadData()
   }, [])
@@ -65,8 +71,15 @@ export default function ProjectsPage() {
     }
   }
 
-  if (!isAuthenticated) {
-    return <div>Yükleniyor...</div>
+  if (!isAuthenticated || isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
