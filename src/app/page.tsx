@@ -7,7 +7,7 @@ import SocialLinks from '@/components/SocialLinks'
 import ProjectCard from '@/components/ProjectCard'
 import OverlayText from '@/components/OverlayText'
 import Footer from '@/components/Footer'
-import { getPublishedProjects, getSiteSettings, initializeData, Project } from '@/lib/data'
+import { getProjects, getSiteSettings, Project } from '@/lib/data'
 
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -16,14 +16,12 @@ export default function Home() {
   const [siteDescription, setSiteDescription] = useState('Designer & Developer based in Istanbul')
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      // Initialize data if not exists
-      initializeData()
-      
       // Load projects and settings
-      const publishedProjects = getPublishedProjects()
-      const siteSettings = getSiteSettings()
+      const allProjects = await getProjects()
+      const publishedProjects = allProjects.filter(project => project.status === 'published')
+      const siteSettings = await getSiteSettings()
       
       setProjects(publishedProjects)
       setSocialLinks(siteSettings.socialLinks)

@@ -7,7 +7,7 @@ import SocialLinks from '@/components/SocialLinks'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getSiteSettings, initializeData } from '@/lib/data'
+import { getSiteSettings } from '@/lib/data'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -53,13 +53,10 @@ export default function ContactPage() {
     })
   }
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      // Initialize data if not exists
-      initializeData()
-      
       // Load site settings
-      const siteSettings = getSiteSettings()
+      const siteSettings = await getSiteSettings()
       setContactInfo(siteSettings.contactInfo)
       setSocialLinks(siteSettings.socialLinks)
     } catch (error) {

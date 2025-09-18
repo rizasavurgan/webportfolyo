@@ -6,7 +6,7 @@ import SocialLinks from '@/components/SocialLinks'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getSiteSettings, initializeData, SiteSettings } from '@/lib/data'
+import { getSiteSettings, getAboutContent, SiteSettings, AboutContent } from '@/lib/data'
 
 // Mock data - will be replaced with Sanity CMS data
 const mockAbout = {
@@ -52,13 +52,10 @@ const mockAbout = {
 export default function MePage() {
   const [socialLinks, setSocialLinks] = useState<Array<{platform: string, url: string}>>([])
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      // Initialize data if not exists
-      initializeData()
-      
       // Load site settings
-      const siteSettingsData = getSiteSettings()
+      const siteSettingsData = await getSiteSettings()
       setSocialLinks(siteSettingsData.socialLinks)
     } catch (error) {
       console.error('Error loading about data:', error)
