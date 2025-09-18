@@ -48,10 +48,17 @@ export default function AdminContent() {
     }
     
     // Load existing content
-    const savedContent = localStorage.getItem('portfolio_about')
-    if (savedContent) {
-      setContent(JSON.parse(savedContent))
+    const loadContent = async () => {
+      try {
+        const { getAboutContent } = await import('@/lib/data')
+        const savedContent = await getAboutContent()
+        setContent(savedContent)
+      } catch (error) {
+        console.error('Error loading content:', error)
+      }
     }
+    
+    loadContent()
     
     setIsAuthenticated(true)
   }, [])
@@ -154,12 +161,18 @@ export default function AdminContent() {
     }))
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsLoading(true)
     
     try {
-      localStorage.setItem('portfolio_about', JSON.stringify(content))
-      alert('İçerik başarıyla kaydedildi!')
+      const { saveAboutContent } = await import('@/lib/data')
+      const success = await saveAboutContent(content)
+      
+      if (success) {
+        alert('İçerik başarıyla kaydedildi!')
+      } else {
+        alert('İçerik kaydedilirken bir hata oluştu!')
+      }
     } catch (error) {
       console.error('Error saving content:', error)
       alert('İçerik kaydedilirken bir hata oluştu!')

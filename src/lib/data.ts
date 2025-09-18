@@ -1,8 +1,30 @@
 // Data management utilities for admin panel and site
-// Now using JSON files for shared data instead of localStorage
+// Using JSON files for shared data that everyone can see
 
 // Base URL for data files
 const DATA_BASE_URL = '/data'
+
+// Helper function to save data to JSON files
+async function saveToFile(filename: string, data: any) {
+  try {
+    const response = await fetch(`/api/save-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filename, data }),
+    })
+    
+    if (!response.ok) {
+      throw new Error('Failed to save data')
+    }
+    
+    return true
+  } catch (error) {
+    console.error('Error saving data:', error)
+    return false
+  }
+}
 
 export interface Project {
   _id: string
@@ -67,85 +89,96 @@ export interface AboutContent {
   }>
 }
 
-// Cache for data
-let projectsCache: Project[] | null = null
-let siteSettingsCache: SiteSettings | null = null
-let aboutContentCache: AboutContent | null = null
-
-// Fetch data from JSON files
-async function fetchData<T>(filename: string): Promise<T> {
+// Get projects data
+export async function getProjects(): Promise<Project[]> {
   try {
-    const response = await fetch(`${DATA_BASE_URL}/${filename}`)
+    const response = await fetch(`${DATA_BASE_URL}/projects.json`)
     if (!response.ok) {
-      throw new Error(`Failed to fetch ${filename}`)
+      return []
     }
     return await response.json()
-  } catch (error) {
-    console.error(`Error fetching ${filename}:`, error)
-    throw error
-  }
-}
-
-// Get projects from JSON file
-export async function getProjects(): Promise<Project[]> {
-  if (projectsCache) {
-    return projectsCache
-  }
-  
-  try {
-    projectsCache = await fetchData<Project[]>('projects.json')
-    return projectsCache
   } catch (error) {
     console.error('Error loading projects:', error)
     return []
   }
 }
 
-// Get site settings from JSON file
+// Save projects data
+export async function saveProjects(projects: Project[]): Promise<boolean> {
+  return await saveToFile('projects.json', projects)
+}
+
+// Get site settings
 export async function getSiteSettings(): Promise<SiteSettings> {
-  if (siteSettingsCache) {
-    return siteSettingsCache
-  }
-  
   try {
-    siteSettingsCache = await fetchData<SiteSettings>('site-settings.json')
-    return siteSettingsCache
+    const response = await fetch(`${DATA_BASE_URL}/site-settings.json`)
+    if (!response.ok) {
+      return {
+        siteTitle: 'Rıza Savurgan',
+        siteDescription: 'Designer & Developer based in Istanbul',
+        logo: '',
+        footerText: '© 2024 Rıza Savurgan. All rights reserved.',
+        socialLinks: [],
+        contactInfo: {
+          email: '',
+          phone: '',
+          location: 'Istanbul, Turkey'
+        },
+        seo: {
+          metaTitle: 'Rıza Savurgan - Designer',
+          metaDescription: 'Brutalist and typography-focused portfolio of Rıza Savurgan, a designer based in Istanbul.',
+          keywords: 'designer, portfolio, brutalist, typography, istanbul, freelance'
+        }
+      }
+    }
+    return await response.json()
   } catch (error) {
     console.error('Error loading site settings:', error)
     return {
-      siteTitle: 'Portfolio',
-      siteDescription: 'Design Portfolio',
+      siteTitle: 'Rıza Savurgan',
+      siteDescription: 'Designer & Developer based in Istanbul',
       logo: '',
-      footerText: '© 2024 Portfolio',
+      footerText: '© 2024 Rıza Savurgan. All rights reserved.',
       socialLinks: [],
       contactInfo: {
         email: '',
         phone: '',
-        location: ''
+        location: 'Istanbul, Turkey'
       },
       seo: {
-        metaTitle: 'Portfolio',
-        metaDescription: 'Design Portfolio',
-        keywords: ''
+        metaTitle: 'Rıza Savurgan - Designer',
+        metaDescription: 'Brutalist and typography-focused portfolio of Rıza Savurgan, a designer based in Istanbul.',
+        keywords: 'designer, portfolio, brutalist, typography, istanbul, freelance'
       }
     }
   }
 }
 
-// Get about content from JSON file
+// Save site settings
+export async function saveSiteSettings(settings: SiteSettings): Promise<boolean> {
+  return await saveToFile('site-settings.json', settings)
+}
+
+// Get about content
 export async function getAboutContent(): Promise<AboutContent> {
-  if (aboutContentCache) {
-    return aboutContentCache
-  }
-  
   try {
-    aboutContentCache = await fetchData<AboutContent>('about-content.json')
-    return aboutContentCache
+    const response = await fetch(`${DATA_BASE_URL}/about-content.json`)
+    if (!response.ok) {
+      return {
+        name: 'Rıza Savurgan',
+        bio: ['Creative designer based in Istanbul', 'Specialized in brutalist design and typography'],
+        profileImage: '',
+        skills: [],
+        experience: [],
+        education: []
+      }
+    }
+    return await response.json()
   } catch (error) {
     console.error('Error loading about content:', error)
     return {
-      name: 'Designer',
-      bio: ['A creative designer'],
+      name: 'Rıza Savurgan',
+      bio: ['Creative designer based in Istanbul', 'Specialized in brutalist design and typography'],
       profileImage: '',
       skills: [],
       experience: [],
@@ -154,72 +187,13 @@ export async function getAboutContent(): Promise<AboutContent> {
   }
 }
 
-// Get project by slug
-export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const projects = await getProjects()
-  return projects.find(project => project.slug.current === slug) || null
-}
-
-// Get project by ID
-export async function getProjectById(id: string): Promise<Project | null> {
-  const projects = await getProjects()
-  return projects.find(project => project._id === id) || null
-}
-
-// Initialize data (now just clears cache)
-export function initializeData(): void {
-  projectsCache = null
-  siteSettingsCache = null
-  aboutContentCache = null
-}
-
-// Save projects (for admin panel - updates JSON file via API)
-export async function saveProjects(projects: Project[]): Promise<boolean> {
-  try {
-    // In a real implementation, this would call an API endpoint
-    // For now, we'll update the cache and localStorage as fallback
-    projectsCache = projects
-    
-    // Update localStorage as backup
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('portfolio_projects', JSON.stringify(projects))
-    }
-    
-    return true
-  } catch (error) {
-    console.error('Error saving projects:', error)
-    return false
-  }
-}
-
-// Save site settings
-export async function saveSiteSettings(settings: SiteSettings): Promise<boolean> {
-  try {
-    siteSettingsCache = settings
-    
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('portfolio_site_settings', JSON.stringify(settings))
-    }
-    
-    return true
-  } catch (error) {
-    console.error('Error saving site settings:', error)
-    return false
-  }
-}
-
 // Save about content
 export async function saveAboutContent(content: AboutContent): Promise<boolean> {
-  try {
-    aboutContentCache = content
-    
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('portfolio_about_content', JSON.stringify(content))
-    }
-    
-    return true
-  } catch (error) {
-    console.error('Error saving about content:', error)
-    return false
-  }
+  return await saveToFile('about-content.json', content)
+}
+
+// Initialize data if not exists
+export function initializeData() {
+  // This function is kept for compatibility but doesn't do anything
+  // since we're using JSON files now
 }

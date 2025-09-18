@@ -57,10 +57,17 @@ export default function AdminSettings() {
     }
     
     // Load existing settings
-    const savedSettings = localStorage.getItem('portfolio_settings')
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings))
+    const loadSettings = async () => {
+      try {
+        const { getSiteSettings } = await import('@/lib/data')
+        const savedSettings = await getSiteSettings()
+        setSettings(savedSettings)
+      } catch (error) {
+        console.error('Error loading settings:', error)
+      }
     }
+    
+    loadSettings()
     
     setIsAuthenticated(true)
   }, [])
@@ -118,12 +125,18 @@ export default function AdminSettings() {
     }))
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsLoading(true)
     
     try {
-      localStorage.setItem('portfolio_settings', JSON.stringify(settings))
-      alert('Ayarlar başarıyla kaydedildi!')
+      const { saveSiteSettings } = await import('@/lib/data')
+      const success = await saveSiteSettings(settings)
+      
+      if (success) {
+        alert('Ayarlar başarıyla kaydedildi!')
+      } else {
+        alert('Ayarlar kaydedilirken bir hata oluştu!')
+      }
     } catch (error) {
       console.error('Error saving settings:', error)
       alert('Ayarlar kaydedilirken bir hata oluştu!')

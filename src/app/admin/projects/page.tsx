@@ -33,9 +33,10 @@ export default function AdminProjects() {
     setIsAuthenticated(true)
   }, [])
 
-  const loadProjects = () => {
+  const loadProjects = async () => {
     try {
-      const projectsData = JSON.parse(localStorage.getItem('portfolio_projects') || '[]')
+      const { getProjects } = await import('@/lib/data')
+      const projectsData = await getProjects()
       setProjects(projectsData)
     } catch (error) {
       console.error('Error loading projects:', error)
@@ -43,22 +44,44 @@ export default function AdminProjects() {
     }
   }
 
-  const deleteProject = (id: string) => {
+  const deleteProject = async (id: string) => {
     if (confirm('Bu projeyi silmek istediğinizden emin misiniz?')) {
-      const updatedProjects = projects.filter(project => project._id !== id)
-      localStorage.setItem('portfolio_projects', JSON.stringify(updatedProjects))
-      setProjects(updatedProjects)
+      try {
+        const { saveProjects } = await import('@/lib/data')
+        const updatedProjects = projects.filter(project => project._id !== id)
+        const success = await saveProjects(updatedProjects)
+        
+        if (success) {
+          setProjects(updatedProjects)
+        } else {
+          alert('Proje silinirken bir hata oluştu!')
+        }
+      } catch (error) {
+        console.error('Error deleting project:', error)
+        alert('Proje silinirken bir hata oluştu!')
+      }
     }
   }
 
-  const toggleStatus = (id: string) => {
-    const updatedProjects = projects.map(project => 
-      project._id === id 
-        ? { ...project, status: project.status === 'published' ? 'draft' : 'published' }
-        : project
-    )
-    localStorage.setItem('portfolio_projects', JSON.stringify(updatedProjects))
-    setProjects(updatedProjects)
+  const toggleStatus = async (id: string) => {
+    try {
+      const { saveProjects } = await import('@/lib/data')
+      const updatedProjects = projects.map(project => 
+        project._id === id 
+          ? { ...project, status: project.status === 'published' ? 'draft' : 'published' }
+          : project
+      )
+      const success = await saveProjects(updatedProjects)
+      
+      if (success) {
+        setProjects(updatedProjects)
+      } else {
+        alert('Proje durumu güncellenirken bir hata oluştu!')
+      }
+    } catch (error) {
+      console.error('Error toggling project status:', error)
+      alert('Proje durumu güncellenirken bir hata oluştu!')
+    }
   }
 
   const filteredProjects = projects.filter(project => {
