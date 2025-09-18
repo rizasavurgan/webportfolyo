@@ -1,0 +1,48 @@
+{
+  "name": "Rıza Savurgan",
+  "bio": [
+    "Istanbul merkezli bir tasarımcı olarak, brutalist tasarım anlayışı ve tipografi odaklı yaklaşımla projeler üretiyorum.",
+    "10+ yıllık deneyimimle marka kimliği, dijital tasarım ve sanat yönetimi alanlarında çalışıyorum.",
+    "Her projede, güçlü görsel diller ve etkileyici kullanıcı deneyimleri yaratmayı hedefliyorum."
+  ],
+  "profileImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+  "skills": [
+    {
+      "name": "Brand Identity",
+      "level": 95
+    },
+    {
+      "name": "Typography",
+      "level": 90
+    },
+    {
+      "name": "Digital Design",
+      "level": 85
+    },
+    {
+      "name": "Art Direction",
+      "level": 88
+    }
+  ],
+  "experience": [
+    {
+      "title": "Senior Designer",
+      "company": "Creative Studio",
+      "period": "2022 - Present",
+      "description": "Marka kimliği ve dijital tasarım projelerinde liderlik yapıyorum."
+    },
+    {
+      "title": "Art Director",
+      "company": "Design Agency",
+      "period": "2020 - 2022",
+      "description": "Sanat yönetimi ve yaratıcı süreçlerde sorumluluk aldım."
+    }
+  ],
+  "education": [
+    {
+      "degree": "Graphic Design",
+      "school": "Mimar Sinan Fine Arts University",
+      "year": "2015"
+    }
+  ]
+}

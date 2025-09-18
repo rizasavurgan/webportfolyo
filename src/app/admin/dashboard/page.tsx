@@ -16,7 +16,7 @@ import {
   LogOut,
   Eye
 } from 'lucide-react'
-import { getProjects, initializeData, Project } from '@/lib/data'
+import { getProjects, Project } from '@/lib/data'
 import StorageInfo from '@/components/StorageInfo'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 
@@ -37,10 +37,7 @@ export default function AdminDashboard() {
     // Load projects data
     const loadData = async () => {
       try {
-        // Initialize data if not exists
-        initializeData()
-        
-        const projectsData = getProjects()
+        const projectsData = await getProjects()
         setProjects(projectsData)
         setStats({
           totalProjects: projectsData.length,

@@ -6,21 +6,19 @@ import ProjectCard from '@/components/ProjectCard'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getPublishedProjects, initializeData, getSiteSettings, Project, SiteSettings } from '@/lib/data'
+import { getProjects, getSiteSettings, Project, SiteSettings } from '@/lib/data'
 
 export default function WorkPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({})
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      // Initialize data if not exists
-      initializeData()
-      
       // Load published projects and site settings
-      const publishedProjects = getPublishedProjects()
-      const siteSettingsData = getSiteSettings()
+      const allProjects = await getProjects()
+      const publishedProjects = allProjects.filter(project => project.status === 'published')
+      const siteSettingsData = await getSiteSettings()
       setProjects(publishedProjects)
       setSiteSettings(siteSettingsData)
       setIsLoading(false)

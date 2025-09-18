@@ -1,0 +1,69 @@
+[
+  {
+    "_id": "project-1",
+    "title": "Brutalist Brand Identity",
+    "slug": { "current": "brutalist-brand-identity" },
+    "shortDescription": "Modern brutalist tasarım anlayışı ile oluşturulan marka kimliği projesi. Sert çizgiler ve kontrast renkler kullanılarak güçlü bir görsel dil yaratıldı.",
+    "fullDescription": "Bu proje, modern brutalist tasarım prensiplerini kullanarak güçlü ve etkileyici bir marka kimliği oluşturmayı amaçlamaktadır. Sert geometrik formlar, kontrast renkler ve tipografik güçlülük ile dikkat çeken bir tasarım dili geliştirilmiştir.\n\nProje kapsamında logo tasarımı, kurumsal kimlik rehberi, kartvizit, antetli kağıt ve dijital uygulamalar tasarlanmıştır. Her bir uygulama, brutalist tasarımın temel prensiplerini yansıtacak şekilde tutarlı bir görsel dil ile oluşturulmuştur.",
+    "role": "Art Direction / Brand Design",
+    "backgroundColor": "#000000",
+    "date": "2024-01-15",
+    "status": "published",
+    "coverImage": {
+      "asset": {
+        "_ref": "image-1",
+        "_type": "reference"
+      }
+    },
+    "gallery": [
+      "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop"
+    ],
+    "externalLink": "https://example.com",
+    "views": 1250
+  },
+  {
+    "_id": "project-2",
+    "title": "Typography Poster Series",
+    "slug": { "current": "typography-poster-series" },
+    "shortDescription": "Tipografi odaklı poster serisi. Farklı font aileleri ve deneysel düzenlemeler ile görsel hikaye anlatımı.",
+    "fullDescription": "Bu poster serisi, tipografinin gücünü ve esnekliğini keşfetmeyi amaçlamaktadır. Her poster, farklı bir font ailesi ve düzenleme yaklaşımı kullanarak aynı mesajı farklı şekillerde ifade etmektedir.\n\nSeri, minimalist yaklaşımdan deneysel düzenlemelere kadar geniş bir yelpazede tasarım çözümleri sunmaktadır. Her poster, tipografinin sadece okunabilirlik değil, aynı zamanda güçlü bir görsel ifade aracı olduğunu göstermektedir.",
+    "role": "Graphic Design / Typography",
+    "backgroundColor": "#ffffff",
+    "date": "2024-02-20",
+    "status": "published",
+    "coverImage": {
+      "asset": {
+        "_ref": "image-2",
+        "_type": "reference"
+      }
+    },
+    "gallery": [
+      "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop"
+    ],
+    "views": 890
+  },
+  {
+    "_id": "project-3",
+    "title": "Digital Art Direction",
+    "slug": { "current": "digital-art-direction" },
+    "shortDescription": "Dijital platformlar için sanat yönetimi projesi. Modern web tasarımı ve kullanıcı deneyimi odaklı yaklaşım.",
+    "fullDescription": "Bu proje, dijital platformlar için kapsamlı bir sanat yönetimi çözümü sunmaktadır. Web sitesi tasarımından mobil uygulama arayüzüne kadar geniş bir yelpazede çalışmalar içermektedir.\n\nProje, kullanıcı deneyimini ön planda tutarak, görsel tasarımın işlevsellikle nasıl harmanlanabileceğini göstermektedir. Modern tasarım trendleri ve kullanıcı ihtiyaçları arasında denge kurularak etkili çözümler üretilmiştir.",
+    "role": "Digital Art Direction",
+    "backgroundColor": "#f0f0f0",
+    "date": "2024-03-10",
+    "status": "published",
+    "coverImage": {
+      "asset": {
+        "_ref": "image-3",
+        "_type": "reference"
+      }
+    },
+    "gallery": [
+      "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop"
+    ],
+    "views": 2100
+  }
+]

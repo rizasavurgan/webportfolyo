@@ -6,8 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getProjectBySlug, initializeData, Project, getProjects } from '@/lib/data'
-
+import { getProjectBySlug, Project } from '@/lib/data'
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const [project, setProject] = useState<Project | null>(null)
@@ -15,14 +14,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
 
   const loadData = useCallback(async () => {
     try {
-      // Initialize data if not exists
-      initializeData()
-      
       // Await params
       const resolvedParams = await params
       
       // Load project by slug
-      const foundProject = getProjectBySlug(resolvedParams.slug)
+      const foundProject = await getProjectBySlug(resolvedParams.slug)
       
       if (!foundProject) {
         // Project not found

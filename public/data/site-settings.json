@@ -1,0 +1,30 @@
+{
+  "siteTitle": "Rıza Savurgan - Designer",
+  "siteDescription": "Brutalist and typography-focused portfolio of Rıza Savurgan, a designer based in Istanbul.",
+  "logo": "",
+  "footerText": "© 2024 Rıza Savurgan. All rights reserved.",
+  "socialLinks": [
+    {
+      "platform": "Instagram",
+      "url": "https://instagram.com/rizasavurgan"
+    },
+    {
+      "platform": "Behance",
+      "url": "https://behance.net/rizasavurgan"
+    },
+    {
+      "platform": "LinkedIn",
+      "url": "https://linkedin.com/in/rizasavurgan"
+    }
+  ],
+  "contactInfo": {
+    "email": "hello@rizasavurgan.com",
+    "phone": "+90 555 123 45 67",
+    "location": "Istanbul, Turkey"
+  },
+  "seo": {
+    "metaTitle": "Rıza Savurgan - Designer",
+    "metaDescription": "Brutalist and typography-focused portfolio of Rıza Savurgan, a designer based in Istanbul.",
+    "keywords": "designer,portfolio,brutalist,typography,istanbul,freelance"
+  }
+}
