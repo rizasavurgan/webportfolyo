@@ -10,9 +10,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   // Enable server-side rendering for Vercel
-  experimental: {
-    serverComponentsExternalPackages: ['fs']
-  }
+  serverExternalPackages: ['fs']
 }
 
 module.exports = nextConfig

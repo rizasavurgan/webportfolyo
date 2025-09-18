@@ -1,15 +1,46 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import ProjectCard from '@/components/ProjectCard'
 import OverlayText from '@/components/OverlayText'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-import { getProjects, getSiteSettings, Project, SiteSettings } from '@/lib/data'
+import { getProjects, Project } from '@/lib/data'
 
-export default async function WorkPage() {
-  // Load data server-side
-  const allProjects = await getProjects()
-  const publishedProjects = allProjects.filter(project => project.status === 'published')
-  const siteSettings = await getSiteSettings()
+export default function WorkPage() {
+  const [projects, setProjects] = useState<Project[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const loadData = async () => {
+    try {
+      console.log('Loading work data...')
+      const allProjects = await getProjects()
+      console.log('Loaded projects:', allProjects)
+      const publishedProjects = allProjects.filter(project => project.status === 'published')
+      console.log('Published projects:', publishedProjects)
+      setProjects(publishedProjects)
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error loading projects:', error)
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -46,9 +77,9 @@ export default async function WorkPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="space-y-8"
           >
-            {publishedProjects.length > 0 ? (
+            {projects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {publishedProjects.map((project, index) => (
+                {projects.map((project, index) => (
                   <motion.div
                     key={project._id}
                     initial={{ opacity: 0, y: 20 }}

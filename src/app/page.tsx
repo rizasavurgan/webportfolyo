@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import SocialLinks from '@/components/SocialLinks'
@@ -6,11 +9,50 @@ import OverlayText from '@/components/OverlayText'
 import Footer from '@/components/Footer'
 import { getProjects, getSiteSettings, Project } from '@/lib/data'
 
-export default async function Home() {
-  // Load data server-side
-  const allProjects = await getProjects()
-  const publishedProjects = allProjects.filter(project => project.status === 'published')
-  const siteSettings = await getSiteSettings()
+export default function Home() {
+  const [projects, setProjects] = useState<Project[]>([])
+  const [socialLinks, setSocialLinks] = useState<Array<{platform: string, url: string}>>([])
+  const [siteTitle, setSiteTitle] = useState('Rıza Savurgan')
+  const [siteDescription, setSiteDescription] = useState('Designer & Developer based in Istanbul')
+  const [isLoading, setIsLoading] = useState(true)
+
+  const loadData = async () => {
+    try {
+      console.log('Loading data...')
+      // Load projects and settings
+      const allProjects = await getProjects()
+      console.log('Loaded projects:', allProjects)
+      const publishedProjects = allProjects.filter(project => project.status === 'published')
+      console.log('Published projects:', publishedProjects)
+      
+      const siteSettings = await getSiteSettings()
+      console.log('Loaded settings:', siteSettings)
+      
+      setProjects(publishedProjects)
+      setSocialLinks(siteSettings.socialLinks)
+      setSiteTitle(siteSettings.siteTitle)
+      setSiteDescription(siteSettings.siteDescription)
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error loading data:', error)
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -33,12 +75,12 @@ export default async function Home() {
             className="mb-16"
           >
             <h1 className="text-4xl lg:text-6xl xl:text-7xl text-brutal text-black leading-none mb-6">
-              {siteSettings.siteTitle}
+              {siteTitle}
             </h1>
             <p className="text-lg text-gray-600 font-medium mb-8">
-              {siteSettings.siteDescription}
+              {siteDescription}
             </p>
-            <SocialLinks links={siteSettings.socialLinks} />
+            <SocialLinks links={socialLinks} />
           </motion.div>
 
           {/* Featured Work Section */}
@@ -50,9 +92,9 @@ export default async function Home() {
           >
             <h2 className="text-2xl font-bold text-gray-900 mb-8">Featured Work</h2>
             
-            {publishedProjects.length > 0 ? (
+            {projects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {publishedProjects.slice(0, 4).map((project, index) => (
+                {projects.slice(0, 4).map((project, index) => (
                   <motion.div
                     key={project._id}
                     initial={{ opacity: 0, y: 20 }}
@@ -70,7 +112,7 @@ export default async function Home() {
               </div>
             )}
 
-            {publishedProjects.length > 4 && (
+            {projects.length > 4 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
