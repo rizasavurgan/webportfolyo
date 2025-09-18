@@ -3,26 +3,24 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Search,
-  Filter,
-  ArrowLeft
-} from 'lucide-react'
-import { getProjects, saveProjects, Project, initializeData } from '@/lib/data'
+import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 
-export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+interface Project {
+  _id: string
+  title: string
+  slug: { current: string }
+  shortDescription: string
+  status: 'draft' | 'published'
+  date: string
+  views?: number
+}
+
+export default function AdminProjects() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all')
 
   useEffect(() => {
-    // Wait for client-side hydration
     if (typeof window === 'undefined') return
     
     const auth = localStorage.getItem('adminAuth')
@@ -30,79 +28,76 @@ export default function ProjectsPage() {
       window.location.href = '/admin'
       return
     }
+    
+    loadProjects()
     setIsAuthenticated(true)
-
-    // Load projects from localStorage
-    const loadData = async () => {
-      try {
-        // Initialize data if not exists
-        initializeData()
-
-        const projectsData = getProjects()
-        setProjects(projectsData)
-      } catch (error) {
-        console.error('Error loading projects:', error)
-        setProjects([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadData()
   }, [])
 
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.shortDescription.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
-
-  const handleDeleteProject = (id: string) => {
-    if (confirm('Bu projeyi silmek istediğinizden emin misiniz?')) {
-      const updatedProjects = projects.filter(project => project._id !== id)
-      setProjects(updatedProjects)
-      saveProjects(updatedProjects)
-      
-      // Dispatch custom event to notify other tabs
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('dataUpdated'))
-      }
+  const loadProjects = () => {
+    try {
+      const projectsData = JSON.parse(localStorage.getItem('portfolio_projects') || '[]')
+      setProjects(projectsData)
+    } catch (error) {
+      console.error('Error loading projects:', error)
+      setProjects([])
     }
   }
 
-  if (!isAuthenticated || isLoading) {
+  const deleteProject = (id: string) => {
+    if (confirm('Bu projeyi silmek istediğinizden emin misiniz?')) {
+      const updatedProjects = projects.filter(project => project._id !== id)
+      localStorage.setItem('portfolio_projects', JSON.stringify(updatedProjects))
+      setProjects(updatedProjects)
+    }
+  }
+
+  const toggleStatus = (id: string) => {
+    const updatedProjects = projects.map(project => 
+      project._id === id 
+        ? { ...project, status: project.status === 'published' ? 'draft' : 'published' }
+        : project
+    )
+    localStorage.setItem('portfolio_projects', JSON.stringify(updatedProjects))
+    setProjects(updatedProjects)
+  }
+
+  const filteredProjects = projects.filter(project => {
+    if (filter === 'all') return true
+    return project.status === filter
+  })
+
+  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
-          <p className="text-gray-600">Yükleniyor...</p>
+          <p className="text-black font-medium">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white text-black">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white border-b-4 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <Link
                 href="/admin/dashboard"
-                className="mr-4 text-gray-400 hover:text-gray-600"
+                className="mr-4 text-black hover:text-gray-600"
               >
-                <ArrowLeft className="h-5 w-5" />
+                ← Back
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900">Proje Yönetimi</h1>
+              <h1 className="text-4xl font-black tracking-wider">PROJECTS</h1>
             </div>
             <Link
               href="/admin/projects/new"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+              className="inline-flex items-center px-6 py-3 border-2 border-black text-sm font-bold rounded-none text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 uppercase tracking-wide"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Yeni Proje
+              New Project
             </Link>
           </div>
         </div>
@@ -114,132 +109,117 @@ export default function ProjectsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="bg-white shadow rounded-lg p-6 mb-8"
+          className="mb-8"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Proje ara..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-black focus:border-black"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            {/* Status Filter */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Filter className="h-5 w-5 text-gray-400" />
-              </div>
-              <select
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">Tüm Durumlar</option>
-                <option value="published">Yayında</option>
-                <option value="draft">Taslak</option>
-              </select>
-            </div>
-
-            {/* Results Count */}
-            <div className="flex items-center text-sm text-gray-500">
-              {filteredProjects.length} proje bulundu
-            </div>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-6 py-3 border-2 border-black text-sm font-bold rounded-none uppercase tracking-wide ${
+                filter === 'all' 
+                  ? 'bg-black text-white' 
+                  : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+            >
+              All ({projects.length})
+            </button>
+            <button
+              onClick={() => setFilter('published')}
+              className={`px-6 py-3 border-2 border-black text-sm font-bold rounded-none uppercase tracking-wide ${
+                filter === 'published' 
+                  ? 'bg-black text-white' 
+                  : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+            >
+              Published ({projects.filter(p => p.status === 'published').length})
+            </button>
+            <button
+              onClick={() => setFilter('draft')}
+              className={`px-6 py-3 border-2 border-black text-sm font-bold rounded-none uppercase tracking-wide ${
+                filter === 'draft' 
+                  ? 'bg-black text-white' 
+                  : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+            >
+              Drafts ({projects.filter(p => p.status === 'draft').length})
+            </button>
           </div>
         </motion.div>
 
-        {/* Projects Grid */}
+        {/* Projects List */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="space-y-4"
         >
-          {filteredProjects.map((project) => (
-            <div key={project._id} className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    project.status === 'published' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {project.status === 'published' ? 'Yayında' : 'Taslak'}
-                  </span>
+          {filteredProjects.length === 0 ? (
+            <div className="bg-white border-4 border-black rounded-none p-12 text-center">
+              <h3 className="text-xl font-black text-black mb-4 uppercase tracking-wide">No Projects Found</h3>
+              <p className="text-gray-600 mb-6">Create your first project to get started.</p>
+              <Link
+                href="/admin/projects/new"
+                className="inline-flex items-center px-6 py-3 border-2 border-black text-sm font-bold rounded-none text-white bg-black hover:bg-gray-800 uppercase tracking-wide"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Project
+              </Link>
+            </div>
+          ) : (
+            filteredProjects.map((project) => (
+              <div key={project._id} className="bg-white border-4 border-black rounded-none p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-4 mb-2">
+                      <h3 className="text-xl font-black text-black uppercase tracking-wide">
+                        {project.title}
+                      </h3>
+                      <span className={`inline-flex px-3 py-1 text-xs font-black rounded-none border-2 ${
+                        project.status === 'published' 
+                          ? 'bg-black text-white border-black' 
+                          : 'bg-white text-black border-black'
+                      }`}>
+                        {project.status === 'published' ? 'PUBLISHED' : 'DRAFT'}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 font-medium mb-2">{project.shortDescription}</p>
+                    <div className="flex items-center space-x-4 text-sm font-medium text-gray-500">
+                      <span>Slug: {project.slug.current}</span>
+                      <span>•</span>
+                      <span>Date: {project.date}</span>
+                      <span>•</span>
+                      <span>Views: {project.views || 0}</span>
+                    </div>
+                  </div>
                   <div className="flex items-center space-x-2">
-                    <Link
-                      href={`/work/${project.slug.current}`}
-                      target="_blank"
-                      className="text-gray-400 hover:text-gray-600"
+                    <button
+                      onClick={() => toggleStatus(project._id)}
+                      className={`p-3 border-2 border-black rounded-none ${
+                        project.status === 'published'
+                          ? 'text-black hover:bg-black hover:text-white'
+                          : 'text-black hover:bg-black hover:text-white'
+                      }`}
+                      title={project.status === 'published' ? 'Unpublish' : 'Publish'}
                     >
-                      <Eye className="h-4 w-4" />
-                    </Link>
+                      {project.status === 'published' ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                     <Link
                       href={`/admin/projects/edit/${project._id}`}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="p-3 border-2 border-black rounded-none text-black hover:bg-black hover:text-white"
                     >
                       <Edit className="h-4 w-4" />
                     </Link>
                     <button
-                      onClick={() => handleDeleteProject(project._id)}
-                      className="text-gray-400 hover:text-red-600"
+                      onClick={() => deleteProject(project._id)}
+                      className="p-3 border-2 border-black rounded-none text-black hover:bg-black hover:text-white"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
-
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {project.title}
-                </h3>
-                
-                <p className="text-sm text-gray-600 mb-4">
-                  {project.shortDescription}
-                </p>
-
-                <div className="text-sm text-gray-500 mb-4">
-                  <p><strong>Rol:</strong> {project.role}</p>
-                </div>
-
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>Görüntülenme: {project.views || 0}</span>
-                  <span>{new Date(project.date).toLocaleDateString('tr-TR')}</span>
-                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </motion.div>
-
-        {filteredProjects.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <div className="text-gray-400 mb-4">
-              <Plus className="h-12 w-12 mx-auto" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Proje bulunamadı
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Arama kriterlerinize uygun proje bulunamadı.
-            </p>
-            <Link
-              href="/admin/projects/new"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              İlk Projeni Ekle
-            </Link>
-          </motion.div>
-        )}
       </div>
     </div>
   )
